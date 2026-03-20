@@ -160,6 +160,24 @@ Or use the helper script:
 bash scripts/run_hcp_mmse_linux.sh
 ```
 
+### Linux bootstrap script
+
+For a fresh Linux GPU server, you can clone the repository, create or update the conda environment, and run the baseline with one command path.
+
+```bash
+export HCP_MMSE_CSV=/mnt/external_ssd/HCP_A_id_sex_age_mmse_moca.csv
+export HCP_IMAGE_DIR=/mnt/external_ssd/hcp_aging
+export HCP_MMSE_OUTPUT_DIR=/data/internal_disk/brainage_outputs/hcp_mmse_baseline
+export HCP_MMSE_CACHE_DIR=/data/internal_disk/brainage_cache/hcp_mmse_baseline
+bash scripts/bootstrap_hcp_mmse_linux.sh
+```
+
+Optional variables:
+
+- `REPO_URL`: defaults to `https://github.com/EunkuBae/transferlearning.git`
+- `REPO_DIR`: defaults to `transferlearning`
+- `ENV_NAME`: defaults to `brainage-hcp-gpu`
+
 ### Notes
 
 - `device: auto` selects GPU automatically when CUDA is available.
@@ -175,6 +193,7 @@ bash scripts/run_hcp_mmse_linux.sh
 - `configs/experiment/hcp_mmse_smoke.yaml`
 - `configs/environment/linux_gpu_hcp_mmse.yml`
 - `data/metadata/label_mapping.csv`
+- `scripts/bootstrap_hcp_mmse_linux.sh`
 - `scripts/build_splits.py`
 - `scripts/run_hcp_mmse_linux.sh`
 - `src/brainage/data/schemas.py`
