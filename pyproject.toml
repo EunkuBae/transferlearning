@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brainage-modeling"
+version = "0.1.0"
+description = "Structural MRI transfer learning and external validation pipeline for dementia and MMSE prediction"
+requires-python = ">=3.10"
+dependencies = [
+    "PyYAML>=6.0",
+    "numpy>=1.26",
+    "nibabel>=5.2",
+    "torch>=2.2",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

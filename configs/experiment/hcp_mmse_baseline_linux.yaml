@@ -1,0 +1,37 @@
+experiment_name: hcp_mmse_baseline_linux
+
+data:
+  csv_file: HCP_A_id_sex_age_mmse_moca.csv
+  csv_file_env: HCP_MMSE_CSV
+  image_dir: /mnt/external_ssd/hcp_aging
+  image_dir_env: HCP_IMAGE_DIR
+  subject_id_column: subject_id
+  target_column: mmse
+  image_size: [96, 96, 96]
+
+split:
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+model:
+  in_channels: 1
+  channels: [16, 32, 64, 128]
+  head_hidden_dim: 128
+  head_dropout: 0.2
+
+training:
+  seed: 42
+  batch_size: 4
+  epochs: 20
+  learning_rate: 0.0001
+  weight_decay: 0.00001
+  num_workers: 8
+  device: auto
+  mixed_precision: auto
+  cudnn_benchmark: true
+
+outputs:
+  run_dir: /data/internal_disk/brainage_outputs/hcp_mmse_baseline
+  run_dir_env: HCP_MMSE_OUTPUT_DIR
+  cache_dir: /data/internal_disk/brainage_cache/hcp_mmse_baseline
+  cache_dir_env: HCP_MMSE_CACHE_DIR

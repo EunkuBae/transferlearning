@@ -1,0 +1,4 @@
+subject_id,cohort,split,fold_name
+HCP_0001,hcp,val,lodo_adni_holdout
+OASIS_0001,oasis,val,lodo_adni_holdout
+ADNI_0001,adni,test,lodo_adni_holdout

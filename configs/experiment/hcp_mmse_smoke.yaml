@@ -1,0 +1,38 @@
+experiment_name: hcp_mmse_smoke
+
+data:
+  csv_file: HCP_A_id_sex_age_mmse_moca.csv
+  csv_file_env: HCP_MMSE_CSV
+  image_dir: D:/C1_HCP/hcp_aging
+  image_dir_env: HCP_IMAGE_DIR
+  subject_id_column: subject_id
+  target_column: mmse
+  image_size: [32, 32, 32]
+  max_samples: 24
+
+split:
+  val_ratio: 0.2
+  test_ratio: 0.2
+
+model:
+  in_channels: 1
+  channels: [8, 16, 32]
+  head_hidden_dim: 32
+  head_dropout: 0.1
+
+training:
+  seed: 42
+  batch_size: 2
+  epochs: 1
+  learning_rate: 0.0001
+  weight_decay: 0.00001
+  num_workers: 0
+  device: auto
+  mixed_precision: auto
+  cudnn_benchmark: true
+
+outputs:
+  run_dir: outputs/hcp_mmse_smoke
+  run_dir_env: HCP_MMSE_OUTPUT_DIR
+  cache_dir: outputs/cache/hcp_mmse_smoke
+  cache_dir_env: HCP_MMSE_CACHE_DIR

@@ -1,0 +1,44 @@
+experiment_name: baseline_tl
+task: multitask
+train_mode: tl
+dg_method: none
+
+environment:
+  data_root_env: BRAINAGE_DATA_ROOT
+  output_root_env: BRAINAGE_OUTPUT_ROOT
+  metadata_root_env: BRAINAGE_METADATA_ROOT
+
+data:
+  cohorts:
+    - hcp
+    - oasis
+    - adni
+  diagnosis_column: diagnosis
+  mmse_column: mmse
+  image_column: image_path
+  metadata_file: merged_metadata.csv
+
+split:
+  strategy: lodo
+  holdout_cohort: adni
+  validation_ratio: 0.2
+  split_file: data/splits/lodo_adni_holdout.csv
+
+training:
+  seed: 42
+  batch_size: 4
+  epochs_pretrain: 50
+  epochs_finetune: 50
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+
+model:
+  backbone: cnn3d
+  pretrained: true
+  num_classes: 4
+  multitask: true
+
+outputs:
+  checkpoint_dir: outputs/checkpoints
+  prediction_dir: outputs/predictions
+  metrics_dir: outputs/metrics

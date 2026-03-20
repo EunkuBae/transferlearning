@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+*.ipynb
+
+# Local environment files
+.env
+.env.*
+
+# Data and experiment outputs
+data/raw/
+data/interim/
+data/processed/
+outputs/checkpoints/
+outputs/predictions/
+outputs/metrics/
+outputs/attributions/
+outputs/similarities/
+outputs/figures/
+outputs/tables/
+
+# Medical imaging and arrays
+*.nii
+*.nii.gz
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.h5
+
+# Logs
+*.log
+wandb/
+mlruns/

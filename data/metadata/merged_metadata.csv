@@ -1,0 +1,4 @@
+subject_id,cohort,image_path,diagnosis,age,sex,mmse,site,scan_id,split_group,notes
+HCP_0001,hcp,${BRAINAGE_DATA_ROOT}/hcp/sub-HCP_0001/mri/t1_mni.nii.gz,NC,29,M,,HCP_SITE_A,HCP_0001_T1,pretrain,healthy control example
+OASIS_0001,oasis,${BRAINAGE_DATA_ROOT}/oasis/sub-OASIS_0001/mri/t1_mni.nii.gz,MCI,72,F,25,OASIS_SITE_A,OASIS_0001_T1,finetune,mmse available
+ADNI_0001,adni,${BRAINAGE_DATA_ROOT}/adni/sub-ADNI_0001/mri/t1_mni.nii.gz,AD,76,M,18,ADNI_SITE_A,ADNI_0001_T1,finetune,example AD case
