@@ -113,7 +113,10 @@ def evaluate_regression_model(model, data_loader, device):
         for batch in data_loader:
             images = batch["image"].to(device, non_blocking=device.type == "cuda")
             batch_targets = batch["target"].to(device, non_blocking=device.type == "cuda")
-            outputs = model(images)
+            tabular = batch.get("tabular")
+            if tabular is not None:
+                tabular = tabular.to(device, non_blocking=device.type == "cuda")
+            outputs = model(images, tabular)
 
             predictions.extend(outputs.detach().cpu().tolist())
             targets.extend(batch_targets.detach().cpu().tolist())
@@ -141,10 +144,13 @@ def _run_epoch(model, data_loader, optimizer, criterion, device, scaler, mixed_p
     for batch in data_loader:
         images = batch["image"].to(device, non_blocking=device.type == "cuda")
         targets = batch["target"].to(device, non_blocking=device.type == "cuda")
+        tabular = batch.get("tabular")
+        if tabular is not None:
+            tabular = tabular.to(device, non_blocking=device.type == "cuda")
 
         optimizer.zero_grad(set_to_none=True)
         with autocast_context():
-            predictions = model(images)
+            predictions = model(images, tabular)
             loss = criterion(predictions, targets)
 
         if mixed_precision:

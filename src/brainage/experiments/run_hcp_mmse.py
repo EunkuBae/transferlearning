@@ -70,6 +70,7 @@ def write_summary_report(path: Path, payload: dict) -> None:
         f"Experiment: {payload['experiment_name']}",
         f"Device: {payload['device']}",
         f"Checkpoint: {payload['checkpoint_path']}",
+        f"Use demographics: {payload['use_demographics']}",
         "",
         "Resolved Paths:",
         f"  csv_path: {payload['resolved_paths']['csv_path']}",
@@ -126,6 +127,8 @@ def main() -> None:
     set_global_seed(seed)
 
     data_config = config.get("data", {})
+    model_config = config.get("model", {})
+    use_demographics = bool(model_config.get("use_demographics", False))
     csv_path = resolve_config_path(
         raw_value=str(data_config["csv_file"]),
         env_name=data_config.get("csv_file_env"),
@@ -144,6 +147,8 @@ def main() -> None:
         image_dir=image_dir,
         subject_id_column=subject_id_column,
         target_column=target_column,
+        age_column=data_config.get("age_column", "age"),
+        sex_column=data_config.get("sex_column", "sex"),
     )
     max_samples = data_config.get("max_samples")
     if max_samples is not None:
@@ -175,18 +180,21 @@ def main() -> None:
     train_dataset = HCPMMSEDataset(
         split_sets["train"],
         image_size=image_size,
+        use_demographics=use_demographics,
         cache_dir=cache_dir / "train" if cache_dir is not None else None,
         cache_prefix="train",
     )
     val_dataset = HCPMMSEDataset(
         split_sets["val"],
         image_size=image_size,
+        use_demographics=use_demographics,
         cache_dir=cache_dir / "val" if cache_dir is not None else None,
         cache_prefix="val",
     )
     test_dataset = HCPMMSEDataset(
         split_sets["test"],
         image_size=image_size,
+        use_demographics=use_demographics,
         cache_dir=cache_dir / "test" if cache_dir is not None else None,
         cache_prefix="test",
     )
@@ -212,6 +220,7 @@ def main() -> None:
 
     metrics_payload = {
         "experiment_name": config.get("experiment_name", "hcp_mmse"),
+        "use_demographics": use_demographics,
         "num_examples": len(examples),
         "split_sizes": {key: len(value) for key, value in split_sets.items()},
         "device": results["device"],

@@ -42,6 +42,8 @@ class HCPMMSEExample:
     subject_id: str
     image_path: Path
     mmse: float
+    age: float | None = None
+    sex: str | None = None
 
 
 def extract_subject_id_from_filename(filename: str) -> str:
@@ -56,11 +58,25 @@ def _resolve_csv_column(fieldnames: Iterable[str], desired_name: str) -> str:
     return normalized[key]
 
 
+def _parse_optional_float(value: str | None, row_index: int, column_name: str) -> float | None:
+    if value is None:
+        return None
+    stripped = str(value).strip()
+    if not stripped:
+        return None
+    try:
+        return float(stripped)
+    except ValueError as exc:
+        raise ValueError(f"Row {row_index}: invalid {column_name} value '{stripped}'") from exc
+
+
 def discover_hcp_mmse_examples(
     csv_path: Path,
     image_dir: Path,
     subject_id_column: str = "subject_id",
     target_column: str = "mmse",
+    age_column: str | None = "age",
+    sex_column: str | None = "sex",
 ) -> list[HCPMMSEExample]:
     image_lookup = {
         extract_subject_id_from_filename(path.name): path
@@ -74,6 +90,8 @@ def discover_hcp_mmse_examples(
 
         subject_col = _resolve_csv_column(reader.fieldnames, subject_id_column)
         target_col = _resolve_csv_column(reader.fieldnames, target_column)
+        age_col = _resolve_csv_column(reader.fieldnames, age_column) if age_column else None
+        sex_col = _resolve_csv_column(reader.fieldnames, sex_column) if sex_column else None
 
         examples: list[HCPMMSEExample] = []
         seen_subject_ids: set[str] = set()
@@ -94,8 +112,21 @@ def discover_hcp_mmse_examples(
             except ValueError as exc:
                 raise ValueError(f"Row {row_index}: invalid MMSE value '{target_value}'") from exc
 
+            age = _parse_optional_float(row.get(age_col) if age_col else None, row_index, age_col or "age")
+            sex = str(row.get(sex_col, "")).strip().upper() if sex_col else None
+            if sex == "":
+                sex = None
+
             seen_subject_ids.add(subject_id)
-            examples.append(HCPMMSEExample(subject_id=subject_id, image_path=image_path, mmse=mmse))
+            examples.append(
+                HCPMMSEExample(
+                    subject_id=subject_id,
+                    image_path=image_path,
+                    mmse=mmse,
+                    age=age,
+                    sex=sex,
+                )
+            )
 
     if not examples:
         raise ValueError("No HCP MMSE examples were matched between the CSV and image directory.")
@@ -140,14 +171,17 @@ class HCPMMSEDataset(Dataset):
         self,
         examples: list[HCPMMSEExample],
         image_size: tuple[int, int, int],
+        use_demographics: bool = False,
         cache_dir: Path | None = None,
         cache_prefix: str = "dataset",
     ) -> None:
         require_hcp_dependencies()
         self.examples = examples
         self.image_size = image_size
+        self.use_demographics = use_demographics
         self.cache_dir = cache_dir
         self.cache_prefix = cache_prefix
+        self.age_mean, self.age_std = self._compute_age_stats(examples)
         if self.cache_dir is not None:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -158,11 +192,19 @@ class HCPMMSEDataset(Dataset):
         example = self.examples[index]
         volume = self._load_volume(example)
         target = torch.tensor(example.mmse, dtype=torch.float32)
-        return {
+        item = {
             "image": volume,
             "target": target,
             "subject_id": example.subject_id,
         }
+        if self.use_demographics:
+            item["tabular"] = self._build_tabular_features(example)
+        return item
+
+    def _build_tabular_features(self, example: HCPMMSEExample):
+        age = 0.0 if example.age is None else (example.age - self.age_mean) / self.age_std
+        sex = 1.0 if str(example.sex or "").upper() == "M" else 0.0
+        return torch.tensor([age, sex], dtype=torch.float32)
 
     def _cache_path(self, example: HCPMMSEExample) -> Path | None:
         if self.cache_dir is None:
@@ -197,6 +239,16 @@ class HCPMMSEDataset(Dataset):
             torch.save(volume_tensor, cache_path)
 
         return volume_tensor
+
+    @staticmethod
+    def _compute_age_stats(examples: list[HCPMMSEExample]) -> tuple[float, float]:
+        ages = [float(example.age) for example in examples if example.age is not None]
+        if not ages:
+            return 0.0, 1.0
+        mean = sum(ages) / len(ages)
+        variance = sum((age - mean) ** 2 for age in ages) / len(ages)
+        std = variance ** 0.5
+        return mean, std if std > 1e-6 else 1.0
 
     @staticmethod
     def _zscore(volume):
