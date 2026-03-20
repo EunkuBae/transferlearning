@@ -178,12 +178,89 @@ Optional variables:
 - `REPO_DIR`: defaults to `transferlearning`
 - `ENV_NAME`: defaults to `brainage-hcp-gpu`
 
+## Tailscale And Tmux
+
+### 1. Server-side Tailscale setup
+
+On the Linux server:
+
+```bash
+bash scripts/setup_tailscale_linux.sh
+```
+
+This script:
+
+- installs Tailscale if needed
+- installs `tmux` on Debian or Ubuntu if needed
+- runs `sudo tailscale up --ssh --accept-routes`
+
+After that, check the server identity:
+
+```bash
+tailscale status
+tailscale ip -4
+```
+
+### 2. Connect from your local machine
+
+From your own computer, connect with Tailscale SSH:
+
+```bash
+ssh <linux-user>@<tailscale-ip>
+```
+
+or
+
+```bash
+ssh <linux-user>@<tailscale-device-name>
+```
+
+### 3. Start training in tmux
+
+Once connected to the Linux server:
+
+```bash
+export HCP_MMSE_CSV=/mnt/external_ssd/HCP_A_id_sex_age_mmse_moca.csv
+export HCP_IMAGE_DIR=/mnt/external_ssd/hcp_aging
+export HCP_MMSE_OUTPUT_DIR=/data/internal_disk/brainage_outputs/hcp_mmse_baseline
+export HCP_MMSE_CACHE_DIR=/data/internal_disk/brainage_cache/hcp_mmse_baseline
+bash scripts/start_hcp_mmse_tmux.sh
+```
+
+This starts a tmux session named `hcp_mmse` by default, writes logs under the internal-disk output directory, and keeps training running after you disconnect.
+
+### 4. Reattach later
+
+```bash
+bash scripts/attach_hcp_mmse_tmux.sh
+```
+
+Or directly:
+
+```bash
+tmux attach -t hcp_mmse
+```
+
+Detach without stopping training:
+
+```text
+Ctrl-b then d
+```
+
+### 5. Useful tmux checks
+
+```bash
+tmux ls
+tmux capture-pane -pt hcp_mmse | tail -n 40
+```
+
 ### Notes
 
 - `device: auto` selects GPU automatically when CUDA is available.
 - `mixed_precision: auto` enables AMP automatically on CUDA.
 - cached tensors are stored as `.pt` files under the configured cache directory.
 - the final `training_summary.txt` includes validation and test metrics such as `MAE`, `MSE`, `RMSE`, `Pearson r`, and `R2`.
+- `scripts/start_hcp_mmse_tmux.sh` writes a per-run tmux log under `HCP_MMSE_OUTPUT_DIR/tmux_logs` by default.
 
 ## Current Starter Files
 
@@ -193,9 +270,12 @@ Optional variables:
 - `configs/experiment/hcp_mmse_smoke.yaml`
 - `configs/environment/linux_gpu_hcp_mmse.yml`
 - `data/metadata/label_mapping.csv`
+- `scripts/attach_hcp_mmse_tmux.sh`
 - `scripts/bootstrap_hcp_mmse_linux.sh`
 - `scripts/build_splits.py`
 - `scripts/run_hcp_mmse_linux.sh`
+- `scripts/setup_tailscale_linux.sh`
+- `scripts/start_hcp_mmse_tmux.sh`
 - `src/brainage/data/schemas.py`
 - `src/brainage/data/split_builders.py`
 - `src/brainage/data/hcp_mmse.py`
@@ -204,4 +284,4 @@ Optional variables:
 
 ## Immediate Next Step
 
-The next practical step is to run the full HCP MMSE baseline on the Linux GPU machine and review `training_summary.txt`, `metrics.json`, and `test_predictions.csv` from the internal-disk output directory.
+The next practical step is to bring the Linux GPU server into Tailscale, start the HCP MMSE baseline in tmux, and monitor `training_summary.txt`, `metrics.json`, `test_predictions.csv`, and the tmux log file from the internal-disk output directory.
