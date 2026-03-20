@@ -1,0 +1,48 @@
+experiment_name: oasis_mmse_multimodal_transfer_smoke
+
+data:
+  metadata_file: OASIS_MMSE.xlsx
+  metadata_file_env: OASIS_MMSE_METADATA_FILE
+  image_dir: D:/C2_OASIS
+  image_dir_env: OASIS_IMAGE_DIR
+  subject_id_column: subject_id
+  target_column: mmse
+  age_column: age
+  sex_column: gender
+  image_size: [32, 32, 32]
+  max_samples: 24
+
+split:
+  val_ratio: 0.2
+  test_ratio: 0.2
+
+model:
+  in_channels: 1
+  channels: [8, 16, 32]
+  head_hidden_dim: 32
+  head_dropout: 0.1
+  use_demographics: true
+  tabular_hidden_dim: 8
+
+transfer:
+  source_checkpoint: outputs/hcp_mmse_multimodal_smoke/best_model.pt
+  source_checkpoint_env: SOURCE_CHECKPOINT_PATH
+  load_mode: full
+  freeze_backbone: false
+
+training:
+  seed: 42
+  batch_size: 2
+  epochs: 1
+  learning_rate: 0.00005
+  weight_decay: 0.00001
+  num_workers: 0
+  device: auto
+  mixed_precision: auto
+  cudnn_benchmark: true
+
+outputs:
+  run_dir: outputs/oasis_mmse_multimodal_transfer_smoke
+  run_dir_env: OASIS_MMSE_OUTPUT_DIR
+  cache_dir: outputs/cache/oasis_mmse_multimodal_transfer_smoke
+  cache_dir_env: OASIS_MMSE_CACHE_DIR
