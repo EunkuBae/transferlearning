@@ -71,6 +71,8 @@ def write_summary_report(path: Path, payload: dict) -> None:
         f"Device: {payload['device']}",
         f"Checkpoint: {payload['checkpoint_path']}",
         f"Use demographics: {payload['use_demographics']}",
+        f"Loss: {payload['loss_name']}",
+        f"Selection metric: {payload['selection_metric']}",
         "",
         "Resolved Paths:",
         f"  csv_path: {payload['resolved_paths']['csv_path']}",
@@ -224,6 +226,8 @@ def main() -> None:
         "num_examples": len(examples),
         "split_sizes": {key: len(value) for key, value in split_sets.items()},
         "device": results["device"],
+        "loss_name": results["loss_name"],
+        "selection_metric": results["selection_metric"],
         "best_val_mae": results["best_val_mae"],
         "best_val_metrics": results["best_val_metrics"],
         "test_metrics": {

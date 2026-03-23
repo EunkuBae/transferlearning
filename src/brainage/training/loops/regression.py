@@ -17,6 +17,9 @@ except ModuleNotFoundError:  # pragma: no cover - dependency guard
     nn = None
 
 
+HIGHER_IS_BETTER_METRICS = {"pearson_r", "r2"}
+
+
 def train_hcp_mmse_regressor(
     model,
     train_loader,
@@ -31,18 +34,21 @@ def train_hcp_mmse_regressor(
     mixed_precision = _resolve_mixed_precision(training_config.get("mixed_precision", "auto"), device)
     model = model.to(device)
 
-    criterion = nn.MSELoss()
+    criterion = _build_loss(training_config)
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr=float(training_config.get("learning_rate", 1e-4)),
         weight_decay=float(training_config.get("weight_decay", 1e-5)),
     )
+    scheduler = _build_scheduler(training_config, optimizer)
     scaler = torch.cuda.amp.GradScaler(enabled=mixed_precision)
 
     if device.type == "cuda":
         torch.backends.cudnn.benchmark = bool(training_config.get("cudnn_benchmark", True))
 
+    selection_metric = str(training_config.get("selection_metric", "mae")).lower()
     best_state = deepcopy(model.state_dict())
+    best_metric_value = float("-inf") if selection_metric in HIGHER_IS_BETTER_METRICS else float("inf")
     best_val_mae = float("inf")
     best_val_metrics: dict[str, float] | None = None
     history: list[dict[str, float]] = []
@@ -59,6 +65,7 @@ def train_hcp_mmse_regressor(
             "val_rmse": val_metrics["rmse"],
             "val_pearson_r": val_metrics["pearson_r"],
             "val_r2": val_metrics["r2"],
+            "learning_rate": float(optimizer.param_groups[0]["lr"]),
         }
         history.append(epoch_summary)
         print(
@@ -68,13 +75,20 @@ def train_hcp_mmse_regressor(
             f"val_mse={val_metrics['mse']:.4f} "
             f"val_rmse={val_metrics['rmse']:.4f} "
             f"val_r={val_metrics['pearson_r']:.4f} "
-            f"val_r2={val_metrics['r2']:.4f}"
+            f"val_r2={val_metrics['r2']:.4f} "
+            f"lr={optimizer.param_groups[0]['lr']:.6g}"
         )
 
-        if val_metrics["mae"] < best_val_mae:
-            best_val_mae = val_metrics["mae"]
+        current_metric_value = float(val_metrics[selection_metric])
+        if _is_better(current_metric_value, best_metric_value, selection_metric):
+            best_metric_value = current_metric_value
+            best_val_mae = float(val_metrics["mae"])
             best_val_metrics = {key: value for key, value in val_metrics.items() if key != "predictions"}
             best_state = deepcopy(model.state_dict())
+
+        if scheduler is not None:
+            scheduler_metric = float(val_metrics.get(str(training_config.get("scheduler_metric", "mae")).lower(), val_metrics["mae"]))
+            scheduler.step(scheduler_metric)
 
     model.load_state_dict(best_state)
     test_metrics = evaluate_regression_model(model, test_loader, device)
@@ -88,6 +102,8 @@ def train_hcp_mmse_regressor(
             "history": history,
             "best_val_metrics": best_val_metrics,
             "test_metrics": test_metrics,
+            "loss_name": str(training_config.get("loss", "mse")).lower(),
+            "selection_metric": selection_metric,
         },
         checkpoint_path,
     )
@@ -99,6 +115,8 @@ def train_hcp_mmse_regressor(
         "test_metrics": test_metrics,
         "checkpoint_path": checkpoint_path,
         "device": str(device),
+        "selection_metric": selection_metric,
+        "loss_name": str(training_config.get("loss", "mse")).lower(),
     }
 
 
@@ -166,6 +184,43 @@ def _run_epoch(model, data_loader, optimizer, criterion, device, scaler, mixed_p
         total_examples += batch_size
 
     return total_loss / max(total_examples, 1)
+
+
+def _build_loss(training_config: dict):
+    require_torch()
+    loss_name = str(training_config.get("loss", "mse")).lower()
+    if loss_name == "mse":
+        return nn.MSELoss()
+    if loss_name in {"mae", "l1"}:
+        return nn.L1Loss()
+    if loss_name in {"huber", "smooth_l1"}:
+        delta = float(training_config.get("huber_delta", 1.0))
+        return nn.HuberLoss(delta=delta)
+    raise ValueError(f"Unsupported regression loss: {loss_name}")
+
+
+def _build_scheduler(training_config: dict, optimizer):
+    require_torch()
+    scheduler_name = str(training_config.get("scheduler", "none")).lower()
+    if scheduler_name in {"none", "off", "false", "0", ""}:
+        return None
+    if scheduler_name == "plateau":
+        metric_name = str(training_config.get("scheduler_metric", "mae")).lower()
+        mode = "max" if metric_name in HIGHER_IS_BETTER_METRICS else "min"
+        return torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            mode=mode,
+            factor=float(training_config.get("scheduler_factor", 0.5)),
+            patience=int(training_config.get("scheduler_patience", 3)),
+            min_lr=float(training_config.get("scheduler_min_lr", 1e-6)),
+        )
+    raise ValueError(f"Unsupported scheduler: {scheduler_name}")
+
+
+def _is_better(current: float, best: float, metric_name: str) -> bool:
+    if metric_name in HIGHER_IS_BETTER_METRICS:
+        return current > best
+    return current < best
 
 
 def _resolve_device(device_name: str):

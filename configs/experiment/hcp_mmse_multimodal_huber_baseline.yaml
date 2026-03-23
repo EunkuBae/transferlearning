@@ -1,0 +1,49 @@
+experiment_name: hcp_mmse_multimodal_huber_baseline
+
+data:
+  csv_file: HCP_A_id_sex_age_mmse_moca.csv
+  csv_file_env: HCP_MMSE_CSV
+  image_dir: D:/C1_HCP/hcp_aging
+  image_dir_env: HCP_IMAGE_DIR
+  subject_id_column: subject_id
+  target_column: mmse
+  age_column: age
+  sex_column: sex
+  image_size: [96, 96, 96]
+
+split:
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+model:
+  in_channels: 1
+  channels: [16, 32, 64, 128]
+  head_hidden_dim: 128
+  head_dropout: 0.2
+  use_demographics: true
+  tabular_hidden_dim: 16
+
+training:
+  seed: 42
+  batch_size: 2
+  epochs: 30
+  learning_rate: 0.00005
+  weight_decay: 0.00001
+  num_workers: 4
+  device: auto
+  mixed_precision: auto
+  cudnn_benchmark: true
+  loss: huber
+  huber_delta: 1.0
+  scheduler: plateau
+  scheduler_metric: mae
+  scheduler_factor: 0.5
+  scheduler_patience: 4
+  scheduler_min_lr: 0.000001
+  selection_metric: mae
+
+outputs:
+  run_dir: outputs/hcp_mmse_multimodal_huber_baseline
+  run_dir_env: HCP_MMSE_OUTPUT_DIR
+  cache_dir: outputs/cache/hcp_mmse_multimodal_huber_baseline
+  cache_dir_env: HCP_MMSE_CACHE_DIR
