@@ -23,5 +23,5 @@
     "pearson_r": 0.10951631165466774,
     "r2": -0.12443393963691785
   },
-  "checkpoint_path": "/home/user/brainage_outputs/hcp_mmse_baseline/best_model.pt"
+  "checkpoint_path": "/home/user/modeling/outputs/hcp_mmse_baseline/best_model.pt"
 }

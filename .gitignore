@@ -25,6 +25,8 @@ Thumbs.db
 data/raw/
 data/interim/
 data/processed/
+brainage_outputs/
+outputs/cache/
 outputs/checkpoints/
 outputs/predictions/
 outputs/metrics/
@@ -32,6 +34,7 @@ outputs/attributions/
 outputs/similarities/
 outputs/figures/
 outputs/tables/
+outputs/**/tmux_logs/
 
 # Medical imaging and arrays
 *.nii
