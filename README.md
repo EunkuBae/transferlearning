@@ -66,6 +66,12 @@ Recommended variables:
 - `HCP_IMAGE_DIR`
 - `HCP_MMSE_OUTPUT_DIR`
 - `HCP_MMSE_CACHE_DIR`
+- `OASIS_MMSE_METADATA_FILE`
+- `OASIS_IMAGE_DIR`
+- `OASIS_MMSE_OUTPUT_DIR`
+- `OASIS_MMSE_CACHE_DIR`
+- `ADNI_METADATA_FILE`
+- `ADNI_IMAGE_DIR`
 
 Example Windows PowerShell:
 
@@ -81,12 +87,18 @@ $env:HCP_MMSE_CACHE_DIR="E:\EwhaMediTech\research\brainage\modeling\outputs\cach
 Example Linux Bash:
 
 ```bash
-export BRAINAGE_DATA_ROOT=/data/brainage
-export BRAINAGE_OUTPUT_ROOT=/data/brainage_outputs
-export HCP_MMSE_CSV=/mnt/external_ssd/HCP_A_id_sex_age_mmse_moca.csv
-export HCP_IMAGE_DIR=/mnt/external_ssd/hcp_aging
-export HCP_MMSE_OUTPUT_DIR=/data/internal_disk/brainage_outputs/hcp_mmse_baseline
-export HCP_MMSE_CACHE_DIR=/data/internal_disk/brainage_cache/hcp_mmse_baseline
+export BRAINAGE_DATA_ROOT=/data
+export BRAINAGE_OUTPUT_ROOT=/home/$USER/brainage_outputs
+export HCP_MMSE_CSV=/home/$USER/modeling/HCP_A_id_sex_age_mmse_moca.csv
+export HCP_IMAGE_DIR=/data/C1_HCP/hcp_aging
+export HCP_MMSE_OUTPUT_DIR=/home/$USER/brainage_outputs/hcp_mmse_baseline
+export HCP_MMSE_CACHE_DIR=/home/$USER/brainage_cache/hcp_mmse_baseline
+export OASIS_MMSE_METADATA_FILE=/home/$USER/modeling/OASIS_MMSE.xlsx
+export OASIS_IMAGE_DIR=/data/C2_OASIS
+export OASIS_MMSE_OUTPUT_DIR=/home/$USER/brainage_outputs/oasis_mmse_transfer
+export OASIS_MMSE_CACHE_DIR=/home/$USER/brainage_cache/oasis_mmse_transfer
+export ADNI_METADATA_FILE=/home/$USER/modeling/ADNI_MPR_N3_metadata.csv
+export ADNI_IMAGE_DIR=/data/C3_ADNI
 ```
 
 ## Typical Workflow
@@ -102,10 +114,61 @@ code .
 ### Linux
 
 ```bash
-git clone git@github.com:EunkuBae/transferlearning.git
-cd transferlearning
-python -m brainage.experiments.run_lodo --config configs/experiment/baseline_tl.yaml
+git clone https://github.com/EunkuBae/transferlearning.git modeling
+cd modeling
 ```
+
+## Ubuntu Data Layout Example
+
+If your Ubuntu server uses this layout:
+
+- HCP MRI: `/data/C1_HCP/hcp_aging`
+- OASIS MRI: `/data/C2_OASIS`
+- ADNI MRI: `/data/C3_ADNI`
+- repository: `/home/$USER/modeling`
+
+then use:
+
+- env file: `configs/environment/ubuntu_data_layout.env`
+- HCP launcher: `scripts/run_hcp_mmse_from_env.sh`
+
+### 1. Load the environment variables
+
+```bash
+cd /home/$USER/modeling
+source configs/environment/ubuntu_data_layout.env
+```
+
+### 2. Run HCP baseline training
+
+```bash
+bash scripts/run_hcp_mmse_from_env.sh
+```
+
+This defaults to:
+
+- env file: `configs/environment/ubuntu_data_layout.env`
+- config file: `configs/experiment/hcp_mmse_baseline_linux.yaml`
+- conda env: `brainage-hcp-gpu`
+
+### 3. Run a different config with the same env file
+
+For example, the multimodal HCP baseline:
+
+```bash
+bash scripts/run_hcp_mmse_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/hcp_mmse_multimodal_baseline.yaml
+```
+
+### 4. What this script does
+
+`run_hcp_mmse_from_env.sh`:
+
+- loads the env file
+- creates output and cache directories if needed
+- sets `PYTHONPATH=src`
+- runs `brainage.experiments.run_hcp_mmse`
 
 ## HCP MMSE 3D-CNN Baseline
 
@@ -141,23 +204,19 @@ conda activate brainage-hcp-gpu
 Then set input and output locations.
 The intended pattern is:
 
-- input MRI and CSV on external SSD
-- checkpoints and logs on internal disk
-- cached preprocessed tensors on internal disk
+- input MRI and CSV on external SSD or mounted data disk
+- checkpoints and logs on internal disk or home storage
+- cached preprocessed tensors on internal disk or home storage
 
 ```bash
-export PYTHONPATH=src
-export HCP_MMSE_CSV=/mnt/external_ssd/HCP_A_id_sex_age_mmse_moca.csv
-export HCP_IMAGE_DIR=/mnt/external_ssd/hcp_aging
-export HCP_MMSE_OUTPUT_DIR=/data/internal_disk/brainage_outputs/hcp_mmse_baseline
-export HCP_MMSE_CACHE_DIR=/data/internal_disk/brainage_cache/hcp_mmse_baseline
+source configs/environment/ubuntu_data_layout.env
 python -m brainage.experiments.run_hcp_mmse --config configs/experiment/hcp_mmse_baseline_linux.yaml
 ```
 
 Or use the helper script:
 
 ```bash
-bash scripts/run_hcp_mmse_linux.sh
+bash scripts/run_hcp_mmse_from_env.sh
 ```
 
 ### Linux bootstrap script
@@ -165,10 +224,10 @@ bash scripts/run_hcp_mmse_linux.sh
 For a fresh Linux GPU server, you can clone the repository, create or update the conda environment, and run the baseline with one command path.
 
 ```bash
-export HCP_MMSE_CSV=/mnt/external_ssd/HCP_A_id_sex_age_mmse_moca.csv
-export HCP_IMAGE_DIR=/mnt/external_ssd/hcp_aging
-export HCP_MMSE_OUTPUT_DIR=/data/internal_disk/brainage_outputs/hcp_mmse_baseline
-export HCP_MMSE_CACHE_DIR=/data/internal_disk/brainage_cache/hcp_mmse_baseline
+export HCP_MMSE_CSV=/data/C1_HCP/HCP_A_id_sex_age_mmse_moca.csv
+export HCP_IMAGE_DIR=/data/C1_HCP/hcp_aging
+export HCP_MMSE_OUTPUT_DIR=/home/$USER/brainage_outputs/hcp_mmse_baseline
+export HCP_MMSE_CACHE_DIR=/home/$USER/brainage_cache/hcp_mmse_baseline
 bash scripts/bootstrap_hcp_mmse_linux.sh
 ```
 
@@ -220,11 +279,8 @@ ssh <linux-user>@<tailscale-device-name>
 Once connected to the Linux server:
 
 ```bash
-export HCP_MMSE_CSV=/mnt/external_ssd/HCP_A_id_sex_age_mmse_moca.csv
-export HCP_IMAGE_DIR=/mnt/external_ssd/hcp_aging
-export HCP_MMSE_OUTPUT_DIR=/data/internal_disk/brainage_outputs/hcp_mmse_baseline
-export HCP_MMSE_CACHE_DIR=/data/internal_disk/brainage_cache/hcp_mmse_baseline
-bash scripts/start_hcp_mmse_tmux.sh
+source /home/$USER/modeling/configs/environment/ubuntu_data_layout.env
+bash /home/$USER/modeling/scripts/start_hcp_mmse_tmux.sh
 ```
 
 This starts a tmux session named `hcp_mmse` by default, writes logs under the internal-disk output directory, and keeps training running after you disconnect.
@@ -264,24 +320,30 @@ tmux capture-pane -pt hcp_mmse | tail -n 40
 
 ## Current Starter Files
 
+- `configs/environment/ubuntu_data_layout.env`
 - `configs/experiment/baseline_tl.yaml`
 - `configs/experiment/hcp_mmse_baseline.yaml`
 - `configs/experiment/hcp_mmse_baseline_linux.yaml`
+- `configs/experiment/hcp_mmse_multimodal_baseline.yaml`
 - `configs/experiment/hcp_mmse_smoke.yaml`
+- `configs/experiment/oasis_mmse_transfer.yaml`
 - `configs/environment/linux_gpu_hcp_mmse.yml`
 - `data/metadata/label_mapping.csv`
 - `scripts/attach_hcp_mmse_tmux.sh`
 - `scripts/bootstrap_hcp_mmse_linux.sh`
 - `scripts/build_splits.py`
+- `scripts/run_hcp_mmse_from_env.sh`
 - `scripts/run_hcp_mmse_linux.sh`
 - `scripts/setup_tailscale_linux.sh`
 - `scripts/start_hcp_mmse_tmux.sh`
+- `src/brainage/data/hcp_mmse.py`
+- `src/brainage/data/oasis_mmse.py`
 - `src/brainage/data/schemas.py`
 - `src/brainage/data/split_builders.py`
-- `src/brainage/data/hcp_mmse.py`
-- `src/brainage/experiments/run_lodo.py`
 - `src/brainage/experiments/run_hcp_mmse.py`
+- `src/brainage/experiments/run_lodo.py`
+- `src/brainage/experiments/run_oasis_transfer.py`
 
 ## Immediate Next Step
 
-The next practical step is to bring the Linux GPU server into Tailscale, start the HCP MMSE baseline in tmux, and monitor `training_summary.txt`, `metrics.json`, `test_predictions.csv`, and the tmux log file from the internal-disk output directory.
+The next practical step is to pull the latest repository on Ubuntu, source `configs/environment/ubuntu_data_layout.env`, and run `bash scripts/run_hcp_mmse_from_env.sh` or start it inside tmux with `bash scripts/start_hcp_mmse_tmux.sh`.
