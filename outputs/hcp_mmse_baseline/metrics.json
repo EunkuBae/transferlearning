@@ -1,6 +1,6 @@
 {
-  "experiment_name": "hcp_mmse_baseline_linux",
-  "use_demographics": false,
+  "experiment_name": "hcp_mmse_multimodal_huber_baseline",
+  "use_demographics": true,
   "num_examples": 709,
   "split_sizes": {
     "train": 497,
@@ -8,20 +8,22 @@
     "test": 106
   },
   "device": "cuda",
-  "best_val_mae": 0.8357101476417398,
+  "loss_name": "huber",
+  "selection_metric": "mae",
+  "best_val_mae": 0.8631875380030218,
   "best_val_metrics": {
-    "mae": 0.8357101476417398,
-    "mse": 1.251649441055393,
-    "rmse": 1.1187713980324099,
-    "pearson_r": 0.3835835503801191,
-    "r2": 0.11012825109476243
+    "mae": 0.8631875380030218,
+    "mse": 1.317406722148282,
+    "rmse": 1.1477833951352852,
+    "pearson_r": 0.292127943404614,
+    "r2": 0.06337750379283269
   },
   "test_metrics": {
-    "mae": 0.9206690338422667,
-    "mse": 1.3943341118690955,
-    "rmse": 1.1808192545301315,
-    "pearson_r": 0.10951631165466774,
-    "r2": -0.12443393963691785
+    "mae": 0.8662379282825398,
+    "mse": 1.2571441931193579,
+    "rmse": 1.1212244169297054,
+    "pearson_r": 0.21820971839386943,
+    "r2": -0.01379976701996144
   },
   "checkpoint_path": "/home/user/modeling/outputs/hcp_mmse_baseline/best_model.pt"
 }
