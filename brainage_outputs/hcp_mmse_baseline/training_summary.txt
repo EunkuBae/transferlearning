@@ -1,0 +1,35 @@
+Experiment: hcp_mmse_baseline_linux
+Device: cuda
+Checkpoint: /home/user/brainage_outputs/hcp_mmse_baseline/best_model.pt
+Use demographics: False
+
+Resolved Paths:
+  csv_path: /home/user/modeling/HCP_A_id_sex_age_mmse_moca.csv
+  image_dir: /data/C1_HCP/hcp_aging
+  output_dir: /home/user/brainage_outputs/hcp_mmse_baseline
+  cache_dir: /home/user/brainage_cache/hcp_mmse_baseline
+
+Dataset:
+  num_examples: 709
+  train: 497
+  val: 106
+  test: 106
+
+Best Validation Metrics:
+  mae: 0.8357101476417398
+  mse: 1.251649441055393
+  rmse: 1.1187713980324099
+  pearson_r: 0.3835835503801191
+  r2: 0.11012825109476243
+
+Test Metrics:
+  mae: 0.9206690338422667
+  mse: 1.3943341118690955
+  rmse: 1.1808192545301315
+  pearson_r: 0.10951631165466774
+  r2: -0.12443393963691785
+
+Artifacts:
+  metrics_json: /home/user/brainage_outputs/hcp_mmse_baseline/metrics.json
+  history_json: /home/user/brainage_outputs/hcp_mmse_baseline/history.json
+  test_predictions_csv: /home/user/brainage_outputs/hcp_mmse_baseline/test_predictions.csv

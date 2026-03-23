@@ -1,0 +1,27 @@
+{
+  "experiment_name": "hcp_mmse_baseline_linux",
+  "use_demographics": false,
+  "num_examples": 709,
+  "split_sizes": {
+    "train": 497,
+    "val": 106,
+    "test": 106
+  },
+  "device": "cuda",
+  "best_val_mae": 0.8357101476417398,
+  "best_val_metrics": {
+    "mae": 0.8357101476417398,
+    "mse": 1.251649441055393,
+    "rmse": 1.1187713980324099,
+    "pearson_r": 0.3835835503801191,
+    "r2": 0.11012825109476243
+  },
+  "test_metrics": {
+    "mae": 0.9206690338422667,
+    "mse": 1.3943341118690955,
+    "rmse": 1.1808192545301315,
+    "pearson_r": 0.10951631165466774,
+    "r2": -0.12443393963691785
+  },
+  "checkpoint_path": "/home/user/brainage_outputs/hcp_mmse_baseline/best_model.pt"
+}
