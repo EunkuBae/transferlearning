@@ -1,0 +1,41 @@
+Experiment: oasis_mmse_transfer_full_ft
+Device: cuda
+Checkpoint: /home/user/modeling/outputs/oasis_mmse_transfer_full_ft/best_model.pt
+Source checkpoint: /home/user/modeling/outputs/hcp_mmse_baseline/best_model.pt
+Load mode: backbone
+Freeze backbone: False
+Use demographics: False
+Loss: huber
+Selection metric: mae
+
+Resolved Paths:
+  metadata_path: /home/user/modeling/OASIS_MMSE.xlsx
+  image_dir: /data/C2_OASIS
+  output_dir: /home/user/modeling/outputs/oasis_mmse_transfer_full_ft
+  cache_dir: /home/user/modeling/outputs/cache/oasis_mmse_transfer_full_ft
+
+Dataset:
+  num_examples: 307
+  train: 185
+  val: 61
+  test: 61
+
+Checkpoint Load Report:
+  loaded_keys: 24
+  missing_keys: ['head.layers.0.weight', 'head.layers.0.bias', 'head.layers.3.weight', 'head.layers.3.bias']
+  unexpected_keys: []
+  skipped_mismatched_keys: []
+
+Best Validation Metrics:
+  mae: 2.320759038456151
+  mse: 15.563001217961382
+  rmse: 3.9449969857987703
+  pearson_r: 0.09823206261453575
+  r2: -0.021843724097160955
+
+Test Metrics:
+  mae: 1.8964913477663135
+  mse: 6.795888314158219
+  rmse: 2.6068924630982035
+  pearson_r: 0.4168796991926529
+  r2: 0.12183982438593

@@ -1,0 +1,43 @@
+{
+  "experiment_name": "oasis_mmse_transfer_full_ft",
+  "use_demographics": false,
+  "source_checkpoint_path": "/home/user/modeling/outputs/hcp_mmse_baseline/best_model.pt",
+  "load_mode": "backbone",
+  "freeze_backbone": false,
+  "num_examples": 307,
+  "split_sizes": {
+    "train": 185,
+    "val": 61,
+    "test": 61
+  },
+  "device": "cuda",
+  "loss_name": "huber",
+  "selection_metric": "mae",
+  "best_val_mae": 2.320759038456151,
+  "best_val_metrics": {
+    "mae": 2.320759038456151,
+    "mse": 15.563001217961382,
+    "rmse": 3.9449969857987703,
+    "pearson_r": 0.09823206261453575,
+    "r2": -0.021843724097160955
+  },
+  "checkpoint_load_report": {
+    "loaded_keys": 24,
+    "missing_keys": [
+      "head.layers.0.weight",
+      "head.layers.0.bias",
+      "head.layers.3.weight",
+      "head.layers.3.bias"
+    ],
+    "unexpected_keys": [],
+    "skipped_mismatched_keys": []
+  },
+  "test_metrics": {
+    "mae": 1.8964913477663135,
+    "mse": 6.795888314158219,
+    "rmse": 2.6068924630982035,
+    "pearson_r": 0.4168796991926529,
+    "r2": 0.12183982438593
+  },
+  "checkpoint_path": "/home/user/modeling/outputs/oasis_mmse_transfer_full_ft/best_model.pt"
+}

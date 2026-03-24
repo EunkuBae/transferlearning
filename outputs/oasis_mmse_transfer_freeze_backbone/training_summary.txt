@@ -1,0 +1,41 @@
+Experiment: oasis_mmse_transfer_freeze_backbone
+Device: cuda
+Checkpoint: /home/user/modeling/outputs/oasis_mmse_transfer_freeze_backbone/best_model.pt
+Source checkpoint: /home/user/modeling/outputs/hcp_mmse_baseline/best_model.pt
+Load mode: backbone
+Freeze backbone: True
+Use demographics: False
+Loss: huber
+Selection metric: mae
+
+Resolved Paths:
+  metadata_path: /home/user/modeling/OASIS_MMSE.xlsx
+  image_dir: /data/C2_OASIS
+  output_dir: /home/user/modeling/outputs/oasis_mmse_transfer_freeze_backbone
+  cache_dir: /home/user/modeling/outputs/cache/oasis_mmse_transfer_freeze_backbone
+
+Dataset:
+  num_examples: 307
+  train: 185
+  val: 61
+  test: 61
+
+Checkpoint Load Report:
+  loaded_keys: 24
+  missing_keys: ['head.layers.0.weight', 'head.layers.0.bias', 'head.layers.3.weight', 'head.layers.3.bias']
+  unexpected_keys: []
+  skipped_mismatched_keys: []
+
+Best Validation Metrics:
+  mae: 2.6702930575511497
+  mse: 19.033295993777443
+  rmse: 4.3627165841683375
+  pearson_r: -0.15513413140384474
+  r2: -0.24969816475236217
+
+Test Metrics:
+  mae: 2.3446079316686412
+  mse: 10.803082341117976
+  rmse: 3.2868042748417463
+  pearson_r: -0.22868129036600926
+  r2: -0.39596712707667847
