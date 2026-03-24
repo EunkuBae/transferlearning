@@ -52,3 +52,4 @@ wandb/
 mlruns/
 outputs/**/run_history/
 outputs/**/run_registry.jsonl
+OASIS_transfer_results_interpretation.docx

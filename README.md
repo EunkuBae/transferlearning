@@ -71,8 +71,8 @@ export OASIS_MMSE_METADATA_FILE=/home/$USER/modeling/OASIS_MMSE.xlsx
 export OASIS_IMAGE_DIR=/data/C2_OASIS
 export OASIS_MMSE_OUTPUT_DIR=/home/$USER/modeling/outputs/oasis_mmse_transfer
 export OASIS_MMSE_CACHE_DIR=/home/$USER/modeling/outputs/cache/oasis_mmse_transfer
-export ADNI_METADATA_FILE=/home/$USER/modeling/ADNI_MPR_N3_metadata.csv
-export ADNI_IMAGE_DIR=/data/C3_ADNI
+export ADNI_METADATA_FILE=/data/C3_ADNI/ADNI_MPR_N3_metadata.csv
+export ADNI_IMAGE_DIR=/data/C3_ADNI/ADNI_MPR_N3_ALL
 ```
 
 The ready-to-use Ubuntu env file is:
@@ -192,6 +192,27 @@ bash scripts/run_oasis_transfer_from_env.sh \
 
 Each transfer config writes to its own `outputs/...` directory and also records per-run execution history under `outputs/.../run_history/<timestamp>/`. The runner appends a lightweight run index to `outputs/.../run_registry.jsonl`, while the main artifacts remain `metrics.json`, `history.json`, `training_summary.txt`, and `test_predictions.csv`.
 
+
+## ADNI Classification Baseline
+
+The ADNI classification baseline uses `ADNI_MPR_N3_ALL` and `ADNI_MPR_N3_metadata.csv` as the canonical image and metadata sources.
+
+Linux baseline config:
+
+- `configs/experiment/adni_cls_baseline_linux.yaml`
+
+Run the ADNI baseline on Ubuntu:
+
+```bash
+cd ~/modeling
+source configs/environment/ubuntu_data_layout.env
+bash scripts/run_adni_classification_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/adni_cls_baseline_linux.yaml
+```
+
+This baseline uses a frozen split manifest at `data/splits/adni_cls_seed42.csv` once the first run creates it, so later ADNI classification experiments stay directly comparable.
+
 ## Tailscale And Tmux
 
 Set up the Linux server once:
@@ -251,7 +272,9 @@ Do not track in Git:
 - `configs/experiment/hcp_mmse_multimodal_baseline_linux.yaml`
 - `configs/experiment/oasis_mmse_transfer.yaml`
 - `scripts/migrate_legacy_outputs.py`
+- `scripts/run_adni_classification_from_env.sh`
 - `scripts/run_hcp_mmse_from_env.sh`
 - `scripts/start_hcp_mmse_tmux.sh`
+- `src/brainage/experiments/run_adni_classification.py`
 - `src/brainage/experiments/run_hcp_mmse.py`
 - `src/brainage/experiments/run_oasis_transfer.py`
