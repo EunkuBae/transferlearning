@@ -86,6 +86,33 @@ cd /home/$USER/modeling
 source configs/environment/ubuntu_data_layout.env
 ```
 
+## Merged Metadata
+
+The current LODO/DG preparation step uses HCP and ADNI only. OASIS remains in the regression transfer workflow and is intentionally excluded from the merged metadata used for LODO baseline construction in this phase.
+
+Build the merged metadata CSV on Linux:
+
+```bash
+cd ~/modeling
+source configs/environment/ubuntu_data_layout.env
+PYTHONPATH=src python scripts/build_merged_metadata.py \
+  --hcp-image-dir /data/C1_HCP/hcp_aging \
+  --adni-image-dir /data/C3_ADNI/ADNI_MPR_N3_ALL \
+  --force
+```
+
+This writes `data/metadata/merged_metadata.csv`, which can then be used to build frozen LODO split files.
+
+Build an ADNI-holdout LODO split right after that:
+
+```bash
+cd ~/modeling
+PYTHONPATH=src python scripts/build_splits.py \
+  --metadata data/metadata/merged_metadata.csv \
+  --holdout-cohort adni \
+  --output data/splits/lodo_adni_holdout.csv
+```
+
 ## Update On Linux
 
 Pull the latest GitHub contents:
