@@ -1,8 +1,7 @@
-experiment_name: baseline_tl
+experiment_name: lodo_mmse_adni_holdout
 
 task: mmse_regression
 train_mode: lodo_baseline
-dg_method: none
 
 environment:
   data_root_env: BRAINAGE_DATA_ROOT
@@ -10,16 +9,24 @@ environment:
   metadata_root_env: BRAINAGE_METADATA_ROOT
 
 data:
+  metadata_file: merged_metadata.csv
   cohorts:
     - hcp
     - adni
-  metadata_file: merged_metadata.csv
   image_size: [96, 96, 96]
 
 split:
   strategy: lodo
   holdout_cohort: adni
   split_file: data/splits/lodo_adni_holdout.csv
+
+model:
+  in_channels: 1
+  channels: [16, 32, 64, 128]
+  head_hidden_dim: 128
+  head_dropout: 0.2
+  use_demographics: false
+  tabular_hidden_dim: 16
 
 training:
   seed: 42
@@ -39,15 +46,6 @@ training:
   scheduler_patience: 4
   scheduler_min_lr: 0.000001
   selection_metric: mae
-
-model:
-  backbone: cnn3d
-  in_channels: 1
-  channels: [16, 32, 64, 128]
-  head_hidden_dim: 128
-  head_dropout: 0.2
-  use_demographics: false
-  tabular_hidden_dim: 16
 
 outputs:
   run_dir: outputs/lodo_mmse_adni_holdout

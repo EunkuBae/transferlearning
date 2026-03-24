@@ -113,6 +113,16 @@ PYTHONPATH=src python scripts/build_splits.py \
   --output data/splits/lodo_adni_holdout.csv
 ```
 
+Run the LODO MMSE regression baseline on Linux:
+
+```bash
+cd ~/modeling
+source configs/environment/ubuntu_data_layout.env
+bash scripts/run_lodo_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/lodo_mmse_adni_holdout.yaml
+```
+
 ## Update On Linux
 
 Pull the latest GitHub contents:
