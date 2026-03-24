@@ -7,6 +7,7 @@ import csv
 import json
 import os
 from pathlib import Path
+from typing import Iterable
 
 from brainage.data.hcp_mmse import HCPMMSEDataset, discover_hcp_mmse_examples, split_examples
 from brainage.models.factory import build_hcp_mmse_model
@@ -79,6 +80,8 @@ def write_summary_report(path: Path, payload: dict) -> None:
         f"  image_dir: {payload['resolved_paths']['image_dir']}",
         f"  output_dir: {payload['resolved_paths']['output_dir']}",
         f"  cache_dir: {payload['resolved_paths'].get('cache_dir', 'None')}",
+        f"  split_file: {payload['resolved_paths'].get('split_file', 'None')}",
+        f"  split_source: {payload.get('split_source', 'unknown')}",
         "",
         "Dataset:",
         f"  num_examples: {payload['num_examples']}",
@@ -119,6 +122,78 @@ def maybe_limit_examples(examples, max_samples: int | None):
     return list(examples[:max_samples])
 
 
+def write_split_assignments(path: Path, split_sets: dict[str, list]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["subject_id", "split"])
+        writer.writeheader()
+        for split_name in ("train", "val", "test"):
+            for example in split_sets[split_name]:
+                writer.writerow({"subject_id": example.subject_id, "split": split_name})
+
+
+def load_split_assignments(path: Path, examples: Iterable) -> dict[str, list]:
+    example_by_subject = {example.subject_id: example for example in examples}
+    split_sets = {"train": [], "val": [], "test": []}
+    seen_subject_ids: set[str] = set()
+
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            subject_id = str(row.get("subject_id", "")).strip()
+            split_name = str(row.get("split", "")).strip().lower()
+            if not subject_id:
+                raise ValueError(f"Split file contains an empty subject_id: {path}")
+            if split_name not in split_sets:
+                raise ValueError(f"Split file contains invalid split '{split_name}' for subject_id={subject_id}")
+            if subject_id in seen_subject_ids:
+                raise ValueError(f"Split file contains duplicate subject_id '{subject_id}'")
+            if subject_id not in example_by_subject:
+                raise ValueError(f"Split file references subject_id '{subject_id}' that is missing from the dataset")
+            split_sets[split_name].append(example_by_subject[subject_id])
+            seen_subject_ids.add(subject_id)
+
+    missing_subject_ids = sorted(set(example_by_subject) - seen_subject_ids)
+    if missing_subject_ids:
+        preview = ", ".join(missing_subject_ids[:5])
+        raise ValueError(f"Split file is missing {len(missing_subject_ids)} subjects. First few: {preview}")
+
+    for split_name, split_examples in split_sets.items():
+        if not split_examples:
+            raise ValueError(f"Split file produced an empty '{split_name}' split")
+
+    return split_sets
+
+
+def build_or_load_split_sets(examples: list, split_config: dict, seed: int, runtime_root: Path):
+    split_file = None
+    split_file_raw = split_config.get("split_file")
+    split_file_env = split_config.get("split_file_env")
+    if split_file_raw is not None or split_file_env is not None:
+        split_file = resolve_config_path(
+            raw_value=str(split_file_raw or "data/splits/hcp_mmse_split.csv"),
+            env_name=split_file_env,
+            base_dir=runtime_root,
+        )
+
+    if split_file is not None and split_file.exists():
+        split_sets = load_split_assignments(split_file, examples)
+        split_source = "existing_split_file"
+    else:
+        split_sets = split_examples(
+            examples=examples,
+            val_ratio=float(split_config.get("val_ratio", 0.15)),
+            test_ratio=float(split_config.get("test_ratio", 0.15)),
+            seed=seed,
+        )
+        split_source = "generated_from_seed"
+        if split_file is not None and bool(split_config.get("save_split_file", True)):
+            write_split_assignments(split_file, split_sets)
+            split_source = "generated_and_saved_split_file"
+
+    return split_sets, split_file, split_source
+
+
 def main() -> None:
     args = parse_args()
     config_path = args.config.resolve()
@@ -157,11 +232,11 @@ def main() -> None:
         examples = maybe_limit_examples(examples, int(max_samples))
 
     split_config = config.get("split", {})
-    split_sets = split_examples(
+    split_sets, split_file, split_source = build_or_load_split_sets(
         examples=examples,
-        val_ratio=float(split_config.get("val_ratio", 0.15)),
-        test_ratio=float(split_config.get("test_ratio", 0.15)),
+        split_config=split_config,
         seed=seed,
+        runtime_root=runtime_root,
     )
 
     image_size = tuple(int(value) for value in data_config.get("image_size", [96, 96, 96]))
@@ -236,6 +311,8 @@ def main() -> None:
             if key != "predictions"
         },
         "checkpoint_path": str(results["checkpoint_path"]),
+        "split_source": split_source,
+        "split_file": str(split_file) if split_file is not None else None,
     }
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -246,6 +323,7 @@ def main() -> None:
         "image_dir": str(image_dir),
         "output_dir": str(output_dir),
         "cache_dir": str(cache_dir) if cache_dir is not None else None,
+        "split_file": str(split_file) if split_file is not None else None,
     }
     metrics_json_path = output_dir / "metrics.json"
     history_json_path = output_dir / "history.json"

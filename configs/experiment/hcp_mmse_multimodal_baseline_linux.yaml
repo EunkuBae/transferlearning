@@ -1,4 +1,4 @@
-experiment_name: hcp_mmse_baseline_linux
+experiment_name: hcp_mmse_multimodal_baseline_linux
 
 data:
   csv_file: HCP_A_id_sex_age_mmse_moca.csv
@@ -22,7 +22,7 @@ model:
   channels: [16, 32, 64, 128]
   head_hidden_dim: 128
   head_dropout: 0.2
-  use_demographics: false
+  use_demographics: true
   tabular_hidden_dim: 16
 
 training:
@@ -37,7 +37,7 @@ training:
   cudnn_benchmark: true
 
 outputs:
-  run_dir: outputs/hcp_mmse_baseline
+  run_dir: outputs/hcp_mmse_multimodal_baseline
   run_dir_env:
-  cache_dir: outputs/cache/hcp_mmse_baseline
+  cache_dir: outputs/cache/hcp_mmse_multimodal_baseline
   cache_dir_env:

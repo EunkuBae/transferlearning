@@ -127,14 +127,17 @@ This uses:
 - config file: `configs/experiment/hcp_mmse_baseline_linux.yaml`
 - output dir: `~/modeling/outputs/hcp_mmse_baseline`
 - cache dir: `~/modeling/outputs/cache/hcp_mmse_baseline`
+- frozen split file: `data/splits/hcp_mmse_seed42.csv`
 
-To run the multimodal HCP baseline instead:
+Run the multimodal HCP baseline with the exact same split:
 
 ```bash
 bash scripts/run_hcp_mmse_from_env.sh \
   configs/environment/ubuntu_data_layout.env \
-  configs/experiment/hcp_mmse_multimodal_baseline.yaml
+  configs/experiment/hcp_mmse_multimodal_baseline_linux.yaml
 ```
+
+Both HCP baseline configs share the same `data/splits/hcp_mmse_seed42.csv` file. The first run creates it, and later runs reuse it so `MRI-only` and `multimodal` stay directly comparable. Each run also records execution history under `outputs/.../run_history/<timestamp>/` and appends a lightweight index entry to `outputs/.../run_registry.jsonl`.
 
 ## OASIS Transfer
 
@@ -245,6 +248,7 @@ Do not track in Git:
 - `configs/experiment/hcp_mmse_baseline.yaml`
 - `configs/experiment/hcp_mmse_baseline_linux.yaml`
 - `configs/experiment/hcp_mmse_multimodal_baseline.yaml`
+- `configs/experiment/hcp_mmse_multimodal_baseline_linux.yaml`
 - `configs/experiment/oasis_mmse_transfer.yaml`
 - `scripts/migrate_legacy_outputs.py`
 - `scripts/run_hcp_mmse_from_env.sh`
