@@ -63,25 +63,39 @@ def maybe_limit_examples(examples, max_samples: int | None):
     return list(examples[:max_samples])
 
 
-def load_pretrained_weights(model, checkpoint_path: Path, load_mode: str) -> dict[str, list[str]]:
+def load_pretrained_weights(model, checkpoint_path: Path, load_mode: str) -> dict[str, list[str] | int]:
     checkpoint = torch.load(checkpoint_path, map_location="cpu")
     state_dict = checkpoint.get("model_state_dict", checkpoint)
 
     if load_mode == "full":
-        missing, unexpected = model.load_state_dict(state_dict, strict=False)
+        candidate_state = dict(state_dict)
     elif load_mode == "backbone":
-        backbone_state = {
+        candidate_state = {
             key: value
             for key, value in state_dict.items()
             if key.startswith("backbone.")
         }
-        missing, unexpected = model.load_state_dict(backbone_state, strict=False)
     else:
         raise ValueError(f"Unsupported load_mode: {load_mode}")
 
+    model_state = model.state_dict()
+    compatible_state: dict[str, torch.Tensor] = {}
+    skipped_mismatched_keys: list[str] = []
+
+    for key, value in candidate_state.items():
+        if key not in model_state:
+            continue
+        if model_state[key].shape != value.shape:
+            skipped_mismatched_keys.append(key)
+            continue
+        compatible_state[key] = value
+
+    missing, unexpected = model.load_state_dict(compatible_state, strict=False)
     return {
+        "loaded_keys": len(compatible_state),
         "missing_keys": list(missing),
         "unexpected_keys": list(unexpected),
+        "skipped_mismatched_keys": skipped_mismatched_keys,
     }
 
 
@@ -125,8 +139,10 @@ def write_summary_report(path: Path, payload: dict) -> None:
         f"  test: {payload['split_sizes']['test']}",
         "",
         "Checkpoint Load Report:",
+        f"  loaded_keys: {payload['checkpoint_load_report'].get('loaded_keys', 0)}",
         f"  missing_keys: {payload['checkpoint_load_report']['missing_keys']}",
         f"  unexpected_keys: {payload['checkpoint_load_report']['unexpected_keys']}",
+        f"  skipped_mismatched_keys: {payload['checkpoint_load_report'].get('skipped_mismatched_keys', [])}",
         "",
         "Best Validation Metrics:",
     ]

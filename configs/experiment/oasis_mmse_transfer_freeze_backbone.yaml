@@ -26,7 +26,7 @@ model:
 transfer:
   source_checkpoint: outputs/hcp_mmse_baseline/best_model.pt
   source_checkpoint_env: SOURCE_CHECKPOINT_PATH
-  load_mode: full
+  load_mode: backbone
   freeze_backbone: true
 
 training:

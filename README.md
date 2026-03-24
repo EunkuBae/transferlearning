@@ -155,6 +155,8 @@ Recommended transfer-learning order:
 - `configs/experiment/oasis_mmse_multimodal_transfer_full_ft.yaml`
 - `configs/experiment/oasis_mmse_multimodal_transfer_freeze_backbone.yaml`
 
+The MRI-only transfer configs currently use `load_mode: backbone` so they can initialize safely even when the available HCP checkpoint was trained with demographics. The multimodal transfer configs keep `load_mode: full`.
+
 Run an OASIS transfer experiment on Ubuntu:
 
 ```bash
