@@ -18,7 +18,7 @@ data:
 split:
   strategy: lodo
   holdout_cohort: adni
-  split_file: data/splits/lodo_adni_holdout.csv
+  split_file: ../../data/splits/lodo_adni_holdout.csv
 
 model:
   in_channels: 1
