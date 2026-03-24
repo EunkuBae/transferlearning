@@ -50,3 +50,5 @@ outputs/**/tmux_logs/
 *.log
 wandb/
 mlruns/
+outputs/**/run_history/
+outputs/**/run_registry.jsonl

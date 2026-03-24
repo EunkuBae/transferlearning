@@ -146,11 +146,58 @@ Smoke config:
 
 - `configs/experiment/oasis_mmse_multimodal_transfer_smoke.yaml`
 
+Recommended transfer-learning order:
+
+- `configs/experiment/oasis_mmse_transfer_full_ft.yaml`
+- `configs/experiment/oasis_mmse_transfer_freeze_backbone.yaml`
+- `configs/experiment/oasis_mmse_multimodal_transfer_full_ft.yaml`
+- `configs/experiment/oasis_mmse_multimodal_transfer_freeze_backbone.yaml`
+
+Run an OASIS transfer experiment on Ubuntu:
+
+```bash
+cd ~/modeling
+source configs/environment/ubuntu_data_layout.env
+bash scripts/run_oasis_transfer_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/oasis_mmse_transfer_full_ft.yaml
+```
+
+Run the four transfer experiments in order:
+
+```bash
+bash scripts/run_oasis_transfer_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/oasis_mmse_transfer_full_ft.yaml
+
+bash scripts/run_oasis_transfer_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/oasis_mmse_transfer_freeze_backbone.yaml
+
+bash scripts/run_oasis_transfer_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/oasis_mmse_multimodal_transfer_full_ft.yaml
+
+bash scripts/run_oasis_transfer_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/oasis_mmse_multimodal_transfer_freeze_backbone.yaml
+```
+
+Each transfer config writes to its own `outputs/...` directory and also records per-run execution history under `outputs/.../run_history/<timestamp>/`. The runner appends a lightweight run index to `outputs/.../run_registry.jsonl`, while the main artifacts remain `metrics.json`, `history.json`, `training_summary.txt`, and `test_predictions.csv`.
+
 ## Tailscale And Tmux
 
 Set up the Linux server once:
 
 ```bash
+bash scripts/setup_tailscale_linux.sh
+```
+
+If the server does not have `curl` yet, the script now tries to install `curl` automatically and falls back to `wget` when available. If you want to do it manually first on Ubuntu:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y curl tmux
 bash scripts/setup_tailscale_linux.sh
 ```
 
