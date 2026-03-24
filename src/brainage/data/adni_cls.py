@@ -42,6 +42,18 @@ def _parse_optional_float(value: str | None) -> float | None:
     return float(stripped)
 
 
+def _candidate_image_names(row: dict[str, str], image_name_column: str) -> list[str]:
+    candidates: list[str] = []
+    for column_name in (image_name_column, "copied_file", "source_file"):
+        raw_value = str(row.get(column_name, "") or "").strip()
+        if not raw_value:
+            continue
+        name = Path(raw_value).name
+        if name and name not in candidates:
+            candidates.append(name)
+    return candidates
+
+
 def discover_adni_classification_examples(
     metadata_path: Path,
     image_dir: Path,
@@ -53,7 +65,10 @@ def discover_adni_classification_examples(
     image_name_column: str = "file_name",
 ) -> list[ADNIClassificationExample]:
     require_hcp_dependencies()
-    image_lookup = {path.name: path for path in sorted(image_dir.glob("*.nii"))}
+    image_lookup: dict[str, Path] = {}
+    for pattern in ("*.nii", "*.nii.gz"):
+        for image_path in sorted(image_dir.rglob(pattern)):
+            image_lookup.setdefault(image_path.name, image_path)
 
     with metadata_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
@@ -65,14 +80,18 @@ def discover_adni_classification_examples(
         for row in reader:
             subject_id = str(row.get(subject_id_column, "")).strip()
             diagnosis = normalize_adni_diagnosis(str(row.get(diagnosis_column, "")))
-            image_name = str(row.get(image_name_column, "")).strip()
+            candidate_names = _candidate_image_names(row, image_name_column)
 
-            if not subject_id or diagnosis is None or not image_name:
+            if not subject_id or diagnosis is None or not candidate_names:
                 continue
             if subject_id in seen_subject_ids:
                 continue
 
-            image_path = image_lookup.get(image_name)
+            image_path = None
+            for candidate_name in candidate_names:
+                image_path = image_lookup.get(candidate_name)
+                if image_path is not None:
+                    break
             if image_path is None:
                 continue
 
