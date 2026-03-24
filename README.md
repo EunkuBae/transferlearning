@@ -101,6 +101,8 @@ If you use conda:
 conda env update -n brainage-hcp-gpu -f configs/environment/linux_gpu_hcp_mmse.yml --prune
 ```
 
+After pulling transfer-learning updates, run the env update once before OASIS experiments so dependencies such as `openpyxl` are installed.
+
 ## HCP Baseline
 
 ### Local smoke test
