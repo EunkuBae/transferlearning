@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 import random
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from brainage.data.hcp_mmse import HCPMMSEDataset, require_hcp_dependencies
 
@@ -28,6 +28,8 @@ def normalize_adni_diagnosis(raw_label: str) -> str | None:
     label = str(raw_label or "").strip().upper()
     if label == "CN":
         return "NC"
+    if label in {"MCI", "LMCI", "EMCI"}:
+        return "MCI"
     if label in VALID_ADNI_DIAGNOSIS:
         return label
     return None
@@ -42,13 +44,22 @@ def _parse_optional_float(value: str | None) -> float | None:
     return float(stripped)
 
 
+def _extract_any_path_basename(raw_value: str) -> str:
+    value = str(raw_value or "").strip()
+    if not value:
+        return ""
+    windows_name = PureWindowsPath(value).name
+    posix_name = Path(value).name
+    return windows_name if len(windows_name) < len(posix_name) else posix_name
+
+
 def _candidate_image_names(row: dict[str, str], image_name_column: str) -> list[str]:
     candidates: list[str] = []
     for column_name in (image_name_column, "copied_file", "source_file"):
         raw_value = str(row.get(column_name, "") or "").strip()
         if not raw_value:
             continue
-        name = Path(raw_value).name
+        name = _extract_any_path_basename(raw_value)
         if name and name not in candidates:
             candidates.append(name)
     return candidates
