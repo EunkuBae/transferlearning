@@ -125,14 +125,16 @@ def resolve_runtime_paths(config: dict, config_path: Path) -> dict[str, Path]:
     metadata_file = data_config.get("metadata_file", "merged_metadata.csv")
     split_file = split_config.get("split_file", "data/splits/lodo_adni_holdout.csv")
 
+    output_base_dir = output_root.parent if output_root.name else output_root
+
     return {
         "data_root": data_root,
         "metadata_root": metadata_root,
         "metadata_path": resolve_path(metadata_file, metadata_root),
         "split_file": resolve_path(split_file, config_dir),
         "output_root": output_root,
-        "output_dir": resolve_path(output_config.get("run_dir", "outputs/lodo_mmse_adni_holdout"), config_dir),
-        "cache_dir": resolve_path(output_config.get("cache_dir", "outputs/cache/lodo_mmse_adni_holdout"), config_dir),
+        "output_dir": resolve_path(output_config.get("run_dir", "outputs/lodo_mmse_adni_holdout"), output_base_dir),
+        "cache_dir": resolve_path(output_config.get("cache_dir", "outputs/cache/lodo_mmse_adni_holdout"), output_base_dir),
     }
 
 
