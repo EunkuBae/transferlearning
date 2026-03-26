@@ -103,11 +103,33 @@ def load_pretrained_weights(model, checkpoint_path: Path, load_mode: str) -> dic
     }
 
 
-def apply_freeze_strategy(model, freeze_backbone: bool) -> None:
-    if not freeze_backbone:
-        return
-    for parameter in model.backbone.parameters():
+def apply_freeze_strategy(model, freeze_backbone: bool, trainable_backbone_stages: int | None = None) -> int:
+    backbone_parameters = list(model.backbone.parameters())
+    if freeze_backbone:
+        for parameter in backbone_parameters:
+            parameter.requires_grad = False
+        return 0
+
+    total_stages = len(model.backbone.features) // 4
+    if trainable_backbone_stages is None or trainable_backbone_stages >= total_stages:
+        for parameter in backbone_parameters:
+            parameter.requires_grad = True
+        return total_stages
+
+    if trainable_backbone_stages <= 0:
+        for parameter in backbone_parameters:
+            parameter.requires_grad = False
+        return 0
+
+    for parameter in backbone_parameters:
         parameter.requires_grad = False
+
+    modules_per_stage = 4
+    start_module_index = max(0, (total_stages - trainable_backbone_stages) * modules_per_stage)
+    for module in model.backbone.features[start_module_index:]:
+        for parameter in module.parameters():
+            parameter.requires_grad = True
+    return trainable_backbone_stages
 
 
 def write_predictions(path: Path, predictions: list[dict[str, int | str]]) -> None:
@@ -129,6 +151,7 @@ def write_summary_report(path: Path, payload: dict) -> None:
         f"Source checkpoint: {payload['source_checkpoint_path']}",
         f"Load mode: {payload['load_mode']}",
         f"Freeze backbone: {payload['freeze_backbone']}",
+        f"Trainable backbone stages: {payload.get('trainable_backbone_stages', 'all')}",
         f"Use demographics: {payload['use_demographics']}",
         f"Selection metric: {payload['selection_metric']}",
         f"Class weighting: {payload.get('class_weighting', 'none')}",
@@ -398,7 +421,14 @@ def main() -> None:
         checkpoint_path=source_checkpoint_path,
         load_mode=str(transfer_config.get("load_mode", "backbone")),
     )
-    apply_freeze_strategy(model, freeze_backbone=bool(transfer_config.get("freeze_backbone", False)))
+    trainable_backbone_stages_config = transfer_config.get("trainable_backbone_stages")
+    trainable_backbone_stages = apply_freeze_strategy(
+        model,
+        freeze_backbone=bool(transfer_config.get("freeze_backbone", False)),
+        trainable_backbone_stages=(
+            None if trainable_backbone_stages_config is None else int(trainable_backbone_stages_config)
+        ),
+    )
 
     results = train_adni_classifier(
         model=model,
@@ -416,6 +446,7 @@ def main() -> None:
         "source_checkpoint_path": str(source_checkpoint_path),
         "load_mode": str(transfer_config.get("load_mode", "backbone")),
         "freeze_backbone": bool(transfer_config.get("freeze_backbone", False)),
+        "trainable_backbone_stages": trainable_backbone_stages,
         "num_examples": len(examples),
         "split_sizes": {key: len(value) for key, value in split_sets.items()},
         "label_mapping": ADNI_LABEL_TO_INDEX,
