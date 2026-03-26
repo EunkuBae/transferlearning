@@ -290,6 +290,8 @@ def write_summary_report(path: Path, payload: dict) -> None:
         f"Class weighting: {payload.get('class_weighting', 'none')}",
         f"Sampler strategy: {payload.get('sampler_strategy', 'none')}",
         f"MMSE auxiliary features: {payload.get('mmse_aux_features', {'enabled': False})}",
+        f"Multi-task MMSE head: {payload.get('multi_task_mmse_head', False)}",
+        f"MMSE auxiliary loss weight: {payload.get('mmse_aux_loss_weight', 0.0)}",
         "",
         "Resolved Paths:",
         f"  metadata_path: {payload['resolved_paths']['metadata_path']}",
@@ -611,6 +613,8 @@ def main() -> None:
         "class_weighting": class_weight_mode,
         "sampler_strategy": sampler_strategy,
         "mmse_aux_features": mmse_aux_metadata or {"enabled": False},
+        "multi_task_mmse_head": bool(model_config.get("multi_task_mmse_head", False)),
+        "mmse_aux_loss_weight": float(training_config.get("mmse_aux_loss_weight", 0.0)),
         "split_source": split_source,
         "split_file": str(split_file) if split_file is not None else None,
     }

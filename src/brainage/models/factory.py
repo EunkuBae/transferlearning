@@ -68,7 +68,38 @@ def build_hcp_mmse_model(config: dict) -> CNN3DRegressor:
 
 
 
-class CNN3DClassifier(nn.Module):
+class _CNN3DBackboneWithTabular(nn.Module):
+    def __init__(
+        self,
+        in_channels: int = 1,
+        channels: tuple[int, ...] = (16, 32, 64, 128),
+        tabular_dim: int = 0,
+        tabular_hidden_dim: int = 16,
+    ) -> None:
+        require_torch()
+        super().__init__()
+        self.backbone = CNN3DBackbone(in_channels=in_channels, channels=channels)
+        self.tabular_dim = tabular_dim
+        self.tabular_encoder = None
+        self.fused_dim = self.backbone.output_dim
+        if tabular_dim > 0:
+            self.tabular_encoder = nn.Sequential(
+                nn.Linear(tabular_dim, tabular_hidden_dim),
+                nn.ReLU(inplace=True),
+            )
+            self.fused_dim += tabular_hidden_dim
+
+    def encode_features(self, x, tabular=None):
+        features = self.backbone(x)
+        if self.tabular_encoder is not None:
+            if tabular is None:
+                raise ValueError("tabular features are required for this model configuration")
+            tabular_features = self.tabular_encoder(tabular)
+            features = torch.cat([features, tabular_features], dim=1)
+        return features
+
+
+class CNN3DClassifier(_CNN3DBackboneWithTabular):
     def __init__(
         self,
         num_classes: int,
@@ -79,33 +110,59 @@ class CNN3DClassifier(nn.Module):
         tabular_dim: int = 0,
         tabular_hidden_dim: int = 16,
     ) -> None:
-        require_torch()
-        super().__init__()
-        self.backbone = CNN3DBackbone(in_channels=in_channels, channels=channels)
-        self.tabular_dim = tabular_dim
-        self.tabular_encoder = None
-        fused_dim = self.backbone.output_dim
-        if tabular_dim > 0:
-            self.tabular_encoder = nn.Sequential(
-                nn.Linear(tabular_dim, tabular_hidden_dim),
-                nn.ReLU(inplace=True),
-            )
-            fused_dim += tabular_hidden_dim
+        super().__init__(
+            in_channels=in_channels,
+            channels=channels,
+            tabular_dim=tabular_dim,
+            tabular_hidden_dim=tabular_hidden_dim,
+        )
         self.head = ClassificationHead(
-            input_dim=fused_dim,
+            input_dim=self.fused_dim,
             num_classes=num_classes,
             hidden_dim=head_hidden_dim,
             dropout=head_dropout,
         )
 
     def forward(self, x, tabular=None):
-        features = self.backbone(x)
-        if self.tabular_encoder is not None:
-            if tabular is None:
-                raise ValueError("tabular features are required for this model configuration")
-            tabular_features = self.tabular_encoder(tabular)
-            features = torch.cat([features, tabular_features], dim=1)
+        features = self.encode_features(x, tabular)
         return self.head(features)
+
+
+class CNN3DMultiTaskClassifier(_CNN3DBackboneWithTabular):
+    def __init__(
+        self,
+        num_classes: int,
+        in_channels: int = 1,
+        channels: tuple[int, ...] = (16, 32, 64, 128),
+        head_hidden_dim: int = 128,
+        head_dropout: float = 0.2,
+        tabular_dim: int = 0,
+        tabular_hidden_dim: int = 16,
+    ) -> None:
+        super().__init__(
+            in_channels=in_channels,
+            channels=channels,
+            tabular_dim=tabular_dim,
+            tabular_hidden_dim=tabular_hidden_dim,
+        )
+        self.head = ClassificationHead(
+            input_dim=self.fused_dim,
+            num_classes=num_classes,
+            hidden_dim=head_hidden_dim,
+            dropout=head_dropout,
+        )
+        self.mmse_head = RegressionHead(
+            input_dim=self.fused_dim,
+            hidden_dim=head_hidden_dim,
+            dropout=head_dropout,
+        )
+
+    def forward(self, x, tabular=None):
+        features = self.encode_features(x, tabular)
+        return {
+            "logits": self.head(features),
+            "mmse_pred": self.mmse_head(features),
+        }
 
 
 def build_adni_classification_model(config: dict) -> CNN3DClassifier:
@@ -114,12 +171,15 @@ def build_adni_classification_model(config: dict) -> CNN3DClassifier:
     use_demographics = bool(model_config.get("use_demographics", False))
     num_classes = int(model_config.get("num_classes", 3))
     tabular_dim = int(model_config.get("tabular_input_dim", 2 if use_demographics else 0))
-    return CNN3DClassifier(
-        num_classes=num_classes,
-        in_channels=int(model_config.get("in_channels", 1)),
-        channels=channels,
-        head_hidden_dim=int(model_config.get("head_hidden_dim", 128)),
-        head_dropout=float(model_config.get("head_dropout", 0.2)),
-        tabular_dim=tabular_dim,
-        tabular_hidden_dim=int(model_config.get("tabular_hidden_dim", 16)),
-    )
+    common_kwargs = {
+        "num_classes": num_classes,
+        "in_channels": int(model_config.get("in_channels", 1)),
+        "channels": channels,
+        "head_hidden_dim": int(model_config.get("head_hidden_dim", 128)),
+        "head_dropout": float(model_config.get("head_dropout", 0.2)),
+        "tabular_dim": tabular_dim,
+        "tabular_hidden_dim": int(model_config.get("tabular_hidden_dim", 16)),
+    }
+    if bool(model_config.get("multi_task_mmse_head", False)):
+        return CNN3DMultiTaskClassifier(**common_kwargs)
+    return CNN3DClassifier(**common_kwargs)

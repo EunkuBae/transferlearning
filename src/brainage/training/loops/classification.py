@@ -38,7 +38,10 @@ def train_adni_classifier(
 
     if class_weights is not None:
         class_weights = class_weights.to(device)
-    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    classification_criterion = nn.CrossEntropyLoss(weight=class_weights)
+    mmse_aux_weight = float(training_config.get("mmse_aux_loss_weight", 0.0))
+    mmse_criterion = _build_mmse_criterion(training_config) if mmse_aux_weight > 0 else None
+
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr=float(training_config.get("learning_rate", 1e-4)),
@@ -59,11 +62,23 @@ def train_adni_classifier(
     epochs = int(training_config.get("epochs", 20))
     for epoch in range(1, epochs + 1):
         _apply_staged_unfreeze_if_needed(model, training_config, epoch)
-        train_loss = _run_epoch(model, train_loader, optimizer, criterion, device, scaler, mixed_precision)
+        train_stats = _run_epoch(
+            model,
+            train_loader,
+            optimizer,
+            classification_criterion,
+            mmse_criterion,
+            mmse_aux_weight,
+            device,
+            scaler,
+            mixed_precision,
+        )
         val_metrics = evaluate_classification_model(model, val_loader, device, num_classes=num_classes)
         epoch_summary = {
             "epoch": epoch,
-            "train_loss": train_loss,
+            "train_loss": float(train_stats["loss"]),
+            "train_classification_loss": float(train_stats["classification_loss"]),
+            "train_mmse_loss": float(train_stats["mmse_loss"]),
             "val_accuracy": float(val_metrics["accuracy"]),
             "val_balanced_accuracy": float(val_metrics["balanced_accuracy"]),
             "val_macro_f1": float(val_metrics["macro_f1"]),
@@ -72,7 +87,9 @@ def train_adni_classifier(
         history.append(epoch_summary)
         print(
             f"Epoch {epoch}/{epochs} "
-            f"train_loss={train_loss:.4f} "
+            f"train_loss={train_stats['loss']:.4f} "
+            f"train_cls_loss={train_stats['classification_loss']:.4f} "
+            f"train_mmse_loss={train_stats['mmse_loss']:.4f} "
             f"val_acc={val_metrics['accuracy']:.4f} "
             f"val_bal_acc={val_metrics['balanced_accuracy']:.4f} "
             f"val_macro_f1={val_metrics['macro_f1']:.4f} "
@@ -117,6 +134,7 @@ def train_adni_classifier(
         "device": str(device),
         "selection_metric": selection_metric,
         "class_weights": class_weights.detach().cpu().tolist() if class_weights is not None else None,
+        "mmse_aux_loss_weight": mmse_aux_weight,
     }
 
 
@@ -135,7 +153,8 @@ def evaluate_classification_model(model, data_loader, device, num_classes: int):
             tabular = batch.get("tabular")
             if tabular is not None:
                 tabular = tabular.to(device, non_blocking=device.type == "cuda")
-            logits = model(images, tabular)
+            outputs = model(images, tabular)
+            logits, _ = _split_model_outputs(outputs)
             batch_predictions = torch.argmax(logits, dim=1)
 
             predictions.extend(batch_predictions.detach().cpu().tolist())
@@ -156,9 +175,11 @@ def evaluate_classification_model(model, data_loader, device, num_classes: int):
     return metrics
 
 
-def _run_epoch(model, data_loader, optimizer, criterion, device, scaler, mixed_precision: bool) -> float:
+def _run_epoch(model, data_loader, optimizer, classification_criterion, mmse_criterion, mmse_aux_weight, device, scaler, mixed_precision: bool):
     model.train()
     total_loss = 0.0
+    total_classification_loss = 0.0
+    total_mmse_loss = 0.0
     total_examples = 0
 
     autocast_context = torch.cuda.amp.autocast if mixed_precision else nullcontext
@@ -169,11 +190,17 @@ def _run_epoch(model, data_loader, optimizer, criterion, device, scaler, mixed_p
         tabular = batch.get("tabular")
         if tabular is not None:
             tabular = tabular.to(device, non_blocking=device.type == "cuda")
+        mmse_targets = batch.get("mmse")
+        if mmse_targets is not None:
+            mmse_targets = mmse_targets.to(device, non_blocking=device.type == "cuda").float()
 
         optimizer.zero_grad(set_to_none=True)
         with autocast_context():
-            logits = model(images, tabular)
-            loss = criterion(logits, targets)
+            outputs = model(images, tabular)
+            logits, mmse_pred = _split_model_outputs(outputs)
+            classification_loss = classification_criterion(logits, targets)
+            mmse_loss = _compute_mmse_aux_loss(mmse_criterion, mmse_pred, mmse_targets, logits)
+            loss = classification_loss + (mmse_aux_weight * mmse_loss)
 
         if mixed_precision:
             scaler.scale(loss).backward()
@@ -185,9 +212,43 @@ def _run_epoch(model, data_loader, optimizer, criterion, device, scaler, mixed_p
 
         batch_size = images.shape[0]
         total_loss += loss.item() * batch_size
+        total_classification_loss += classification_loss.item() * batch_size
+        total_mmse_loss += mmse_loss.item() * batch_size
         total_examples += batch_size
 
-    return total_loss / max(total_examples, 1)
+    denominator = max(total_examples, 1)
+    return {
+        "loss": total_loss / denominator,
+        "classification_loss": total_classification_loss / denominator,
+        "mmse_loss": total_mmse_loss / denominator,
+    }
+
+
+def _split_model_outputs(outputs):
+    if isinstance(outputs, dict):
+        logits = outputs.get("logits")
+        if logits is None:
+            raise KeyError("Model output dictionary must contain 'logits'")
+        return logits, outputs.get("mmse_pred")
+    return outputs, None
+
+
+def _compute_mmse_aux_loss(mmse_criterion, mmse_pred, mmse_targets, reference_tensor):
+    if mmse_criterion is None or mmse_pred is None or mmse_targets is None:
+        return reference_tensor.new_tensor(0.0)
+    return mmse_criterion(mmse_pred.float(), mmse_targets.float())
+
+
+def _build_mmse_criterion(training_config: dict):
+    require_torch()
+    loss_name = str(training_config.get("mmse_aux_loss", "mse")).lower()
+    if loss_name == "mse":
+        return nn.MSELoss()
+    if loss_name in {"l1", "mae"}:
+        return nn.L1Loss()
+    if loss_name in {"smooth_l1", "huber"}:
+        return nn.SmoothL1Loss(beta=float(training_config.get("mmse_aux_loss_beta", 1.0)))
+    raise ValueError(f"Unsupported mmse_aux_loss: {loss_name}")
 
 
 def _build_scheduler(training_config: dict, optimizer):
