@@ -1,0 +1,9 @@
+{
+  "config_path": "/home/user/modeling/outputs/adni_transfer_seed_runs/adni_cls_multimodal_transfer_staged_last1_to_all/seed_43.yaml",
+  "runtime_root": "/home/user/modeling",
+  "metadata_path": "/data/C3_ADNI/ADNI_MPR_N3_metadata.csv",
+  "image_dir": "/data/C3_ADNI/ADNI_MPR_N3_ALL",
+  "output_dir": "/home/user/modeling/outputs/adni_cls_multimodal_transfer_staged_last1_to_all_seed43",
+  "cache_dir": "/home/user/modeling/outputs/cache/adni_cls_multimodal_transfer_staged_last1_to_all_seed43",
+  "split_file": "/home/user/modeling/data/splits/adni_cls_seed42.csv"
+}
