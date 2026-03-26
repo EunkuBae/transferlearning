@@ -169,7 +169,28 @@ def stratified_split_examples(
 class ADNIClassificationDataset(HCPMMSEDataset):
     """Dataset that loads ADNI baseline T1w MRI volumes for classification."""
 
+    def __init__(
+        self,
+        examples: list[ADNIClassificationExample],
+        image_size: tuple[int, int, int],
+        use_demographics: bool = False,
+        cache_dir: Path | None = None,
+        cache_prefix: str = "dataset",
+        aux_feature_lookup: dict[str, list[float]] | None = None,
+    ) -> None:
+        super().__init__(
+            examples=examples,
+            image_size=image_size,
+            use_demographics=use_demographics,
+            cache_dir=cache_dir,
+            cache_prefix=cache_prefix,
+        )
+        self.aux_feature_lookup = aux_feature_lookup or {}
+
     def __getitem__(self, index: int) -> dict[str, object]:
+        require_hcp_dependencies()
+        import torch
+
         example = self.examples[index]
         volume = self._load_volume(example)
         item = {
@@ -177,9 +198,19 @@ class ADNIClassificationDataset(HCPMMSEDataset):
             "target": self._build_target(example.diagnosis),
             "target_name": example.diagnosis,
             "subject_id": example.subject_id,
+            "mmse": float(example.mmse) if example.mmse is not None else None,
         }
+
+        tabular_parts = []
         if self.use_demographics:
-            item["tabular"] = self._build_tabular_features(example)
+            tabular_parts.append(self._build_tabular_features(example))
+        if self.aux_feature_lookup:
+            aux_values = self.aux_feature_lookup.get(example.subject_id)
+            if aux_values is None:
+                raise KeyError(f"Missing auxiliary features for subject_id='{example.subject_id}'")
+            tabular_parts.append(torch.tensor(aux_values, dtype=torch.float32))
+        if tabular_parts:
+            item["tabular"] = torch.cat(tabular_parts, dim=0)
         return item
 
     @staticmethod

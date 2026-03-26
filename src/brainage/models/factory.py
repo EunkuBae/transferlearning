@@ -56,12 +56,13 @@ def build_hcp_mmse_model(config: dict) -> CNN3DRegressor:
     model_config = config.get("model", {})
     channels = tuple(model_config.get("channels", [16, 32, 64, 128]))
     use_demographics = bool(model_config.get("use_demographics", False))
+    tabular_dim = int(model_config.get("tabular_input_dim", 2 if use_demographics else 0))
     return CNN3DRegressor(
         in_channels=int(model_config.get("in_channels", 1)),
         channels=channels,
         head_hidden_dim=int(model_config.get("head_hidden_dim", 128)),
         head_dropout=float(model_config.get("head_dropout", 0.2)),
-        tabular_dim=2 if use_demographics else 0,
+        tabular_dim=tabular_dim,
         tabular_hidden_dim=int(model_config.get("tabular_hidden_dim", 16)),
     )
 
@@ -112,12 +113,13 @@ def build_adni_classification_model(config: dict) -> CNN3DClassifier:
     channels = tuple(model_config.get("channels", [16, 32, 64, 128]))
     use_demographics = bool(model_config.get("use_demographics", False))
     num_classes = int(model_config.get("num_classes", 3))
+    tabular_dim = int(model_config.get("tabular_input_dim", 2 if use_demographics else 0))
     return CNN3DClassifier(
         num_classes=num_classes,
         in_channels=int(model_config.get("in_channels", 1)),
         channels=channels,
         head_hidden_dim=int(model_config.get("head_hidden_dim", 128)),
         head_dropout=float(model_config.get("head_dropout", 0.2)),
-        tabular_dim=2 if use_demographics else 0,
+        tabular_dim=tabular_dim,
         tabular_hidden_dim=int(model_config.get("tabular_hidden_dim", 16)),
     )

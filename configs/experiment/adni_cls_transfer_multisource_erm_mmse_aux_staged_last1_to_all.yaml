@@ -1,0 +1,69 @@
+experiment_name: adni_cls_transfer_multisource_erm_mmse_aux_staged_last1_to_all
+
+data:
+  metadata_file_env: ADNI_METADATA_FILE
+  metadata_file: data/metadata/adni_cls.csv
+  image_dir_env: ADNI_IMAGE_DIR
+  image_dir: data/images/adni
+  image_size: [96, 96, 96]
+  subject_id_column: PTID
+  diagnosis_column: DX_bl
+  age_column: AGE
+  sex_column: PTGENDER
+  mmse_column: MMSE
+  image_name_column: file_name
+
+split:
+  split_file: data/splits/adni_cls_seed42.csv
+  save_split_file: true
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+model:
+  architecture: cnn3d_classifier
+  in_channels: 1
+  channels: [16, 32, 64, 128]
+  image_size: [96, 96, 96]
+  num_classes: 3
+  use_demographics: false
+  demographics_hidden_dim: 32
+  dropout: 0.2
+
+transfer:
+  source_checkpoint: outputs/mmse_pretraining_erm/best_model.pt
+  load_mode: backbone
+  freeze_backbone: false
+  trainable_backbone_stages: 1
+  mmse_aux_features:
+    enabled: true
+    predictor_checkpoint: outputs/mmse_pretraining_erm/best_model.pt
+    include_actual_mmse: true
+    include_predicted_mmse: true
+    include_deviation: true
+    batch_size: 4
+    num_workers: 0
+
+training:
+  seed: 42
+  device: auto
+  batch_size: 4
+  epochs: 40
+  learning_rate: 1.0e-5
+  weight_decay: 1.0e-5
+  mixed_precision: auto
+  num_workers: 0
+  scheduler: plateau
+  scheduler_metric: balanced_accuracy
+  scheduler_factor: 0.5
+  scheduler_patience: 5
+  scheduler_min_lr: 1.0e-6
+  selection_metric: balanced_accuracy
+  class_weighting: balanced
+  sampler: none
+  staged_unfreeze:
+    epoch: 6
+    trainable_backbone_stages_after: all
+
+outputs:
+  run_dir: outputs/adni_cls_transfer_multisource_erm_mmse_aux_staged_last1_to_all
+  cache_dir: outputs/cache/adni_cls_transfer_multisource_erm_mmse_aux_staged_last1_to_all

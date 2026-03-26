@@ -15,7 +15,8 @@ from brainage.data.adni_cls import (
     discover_adni_classification_examples,
     stratified_split_examples,
 )
-from brainage.models.factory import build_adni_classification_model
+from brainage.data.hcp_mmse import HCPMMSEDataset
+from brainage.models.factory import build_adni_classification_model, build_hcp_mmse_model
 from brainage.paths import resolve_path
 from brainage.training.loops.classification import train_adni_classifier
 from brainage.utils.experiment_tracking import record_experiment_run
@@ -103,6 +104,137 @@ def load_pretrained_weights(model, checkpoint_path: Path, load_mode: str) -> dic
     }
 
 
+def load_regression_model_from_checkpoint(checkpoint_path: Path):
+    checkpoint = torch.load(checkpoint_path, map_location="cpu")
+    checkpoint_config = checkpoint.get("config")
+    if checkpoint_config is None:
+        raise KeyError(f"Checkpoint does not contain a config: {checkpoint_path}")
+    model = build_hcp_mmse_model(checkpoint_config)
+    state_dict = checkpoint.get("model_state_dict", checkpoint)
+    model.load_state_dict(state_dict, strict=False)
+    model.eval()
+    return model, checkpoint_config
+
+
+def predict_mmse_lookup(
+    examples: list,
+    predictor_checkpoint_path: Path,
+    image_size: tuple[int, int, int],
+    batch_size: int,
+    num_workers: int,
+    cache_dir: Path | None = None,
+):
+    regressor, regressor_config = load_regression_model_from_checkpoint(predictor_checkpoint_path)
+    use_demographics = bool(regressor_config.get("model", {}).get("use_demographics", False))
+    dataset = HCPMMSEDataset(
+        examples,
+        image_size=image_size,
+        use_demographics=use_demographics,
+        cache_dir=cache_dir,
+        cache_prefix="mmse_aux",
+    )
+    loader = build_dataloader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    regressor = regressor.to(device)
+
+    predicted_lookup: dict[str, float] = {}
+    with torch.no_grad():
+        for batch in loader:
+            images = batch["image"].to(device, non_blocking=device.type == "cuda")
+            tabular = batch.get("tabular")
+            if tabular is not None:
+                tabular = tabular.to(device, non_blocking=device.type == "cuda")
+            outputs = regressor(images, tabular)
+            for subject_id, prediction in zip(batch["subject_id"], outputs.detach().cpu().tolist(), strict=True):
+                predicted_lookup[str(subject_id)] = float(prediction)
+    return predicted_lookup
+
+
+def build_mmse_aux_feature_lookup(
+    split_sets: dict[str, list],
+    transfer_config: dict,
+    image_size: tuple[int, int, int],
+    batch_size: int,
+    num_workers: int,
+    runtime_root: Path,
+    cache_dir: Path | None = None,
+):
+    aux_config = transfer_config.get("mmse_aux_features", {})
+    if not bool(aux_config.get("enabled", False)):
+        return None, None
+
+    predictor_checkpoint_path = resolve_config_path(
+        raw_value=str(aux_config.get("predictor_checkpoint", transfer_config["source_checkpoint"])),
+        env_name=aux_config.get("predictor_checkpoint_env") or transfer_config.get("source_checkpoint_env"),
+        base_dir=runtime_root,
+    )
+    combined_examples = []
+    for split_name in ("train", "val", "test"):
+        combined_examples.extend(split_sets[split_name])
+    predicted_lookup = predict_mmse_lookup(
+        examples=combined_examples,
+        predictor_checkpoint_path=predictor_checkpoint_path,
+        image_size=image_size,
+        batch_size=int(aux_config.get("batch_size", batch_size)),
+        num_workers=int(aux_config.get("num_workers", num_workers)),
+        cache_dir=cache_dir / "mmse_aux" if cache_dir is not None else None,
+    )
+
+    feature_names: list[str] = []
+    raw_lookup: dict[str, list[float]] = {}
+    include_actual = bool(aux_config.get("include_actual_mmse", True))
+    include_predicted = bool(aux_config.get("include_predicted_mmse", True))
+    include_deviation = bool(aux_config.get("include_deviation", True))
+    if include_actual:
+        feature_names.append("actual_mmse")
+    if include_predicted:
+        feature_names.append("predicted_mmse")
+    if include_deviation:
+        feature_names.append("mmse_deviation")
+
+    for split_name in ("train", "val", "test"):
+        for example in split_sets[split_name]:
+            actual_mmse = float(example.mmse) if example.mmse is not None else 0.0
+            predicted_mmse = float(predicted_lookup[example.subject_id])
+            deviation = predicted_mmse - actual_mmse
+            values: list[float] = []
+            if include_actual:
+                values.append(actual_mmse)
+            if include_predicted:
+                values.append(predicted_mmse)
+            if include_deviation:
+                values.append(deviation)
+            raw_lookup[example.subject_id] = values
+
+    train_values = [raw_lookup[example.subject_id] for example in split_sets["train"]]
+    means = []
+    stds = []
+    for feature_index in range(len(feature_names)):
+        values = [row[feature_index] for row in train_values]
+        mean = sum(values) / len(values)
+        variance = sum((value - mean) ** 2 for value in values) / len(values)
+        std = variance ** 0.5
+        means.append(mean)
+        stds.append(std if std > 1e-6 else 1.0)
+
+    normalized_lookup = {
+        subject_id: [
+            (value - means[index]) / stds[index]
+            for index, value in enumerate(values)
+        ]
+        for subject_id, values in raw_lookup.items()
+    }
+    return normalized_lookup, {
+        "enabled": True,
+        "feature_names": feature_names,
+        "predictor_checkpoint_path": str(predictor_checkpoint_path),
+        "train_feature_stats": {
+            feature_name: {"mean": float(means[index]), "std": float(stds[index])}
+            for index, feature_name in enumerate(feature_names)
+        },
+    }
+
+
 def apply_freeze_strategy(model, freeze_backbone: bool, trainable_backbone_stages: int | None = None) -> int:
     backbone_parameters = list(model.backbone.parameters())
     if freeze_backbone:
@@ -157,6 +289,7 @@ def write_summary_report(path: Path, payload: dict) -> None:
         f"Selection metric: {payload['selection_metric']}",
         f"Class weighting: {payload.get('class_weighting', 'none')}",
         f"Sampler strategy: {payload.get('sampler_strategy', 'none')}",
+        f"MMSE auxiliary features: {payload.get('mmse_aux_features', {'enabled': False})}",
         "",
         "Resolved Paths:",
         f"  metadata_path: {payload['resolved_paths']['metadata_path']}",
@@ -365,12 +498,31 @@ def main() -> None:
             base_dir=runtime_root,
         )
 
+    training_config = config.get("training", {})
+    staged_unfreeze = training_config.get("staged_unfreeze")
+    batch_size = int(training_config.get("batch_size", 2))
+    num_workers = int(training_config.get("num_workers", 0))
+    num_classes = int(model_config.get("num_classes", len(ADNI_LABEL_TO_INDEX)))
+
+    mmse_aux_feature_lookup, mmse_aux_metadata = build_mmse_aux_feature_lookup(
+        split_sets=split_sets,
+        transfer_config=transfer_config,
+        image_size=image_size,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        runtime_root=runtime_root,
+        cache_dir=cache_dir,
+    )
+    aux_feature_dim = len(mmse_aux_metadata["feature_names"]) if mmse_aux_metadata is not None else 0
+    config.setdefault("model", {})["tabular_input_dim"] = (2 if use_demographics else 0) + aux_feature_dim
+
     train_dataset = ADNIClassificationDataset(
         split_sets["train"],
         image_size=image_size,
         use_demographics=use_demographics,
         cache_dir=cache_dir / "train" if cache_dir is not None else None,
         cache_prefix="train",
+        aux_feature_lookup=mmse_aux_feature_lookup,
     )
     val_dataset = ADNIClassificationDataset(
         split_sets["val"],
@@ -378,6 +530,7 @@ def main() -> None:
         use_demographics=use_demographics,
         cache_dir=cache_dir / "val" if cache_dir is not None else None,
         cache_prefix="val",
+        aux_feature_lookup=mmse_aux_feature_lookup,
     )
     test_dataset = ADNIClassificationDataset(
         split_sets["test"],
@@ -385,13 +538,8 @@ def main() -> None:
         use_demographics=use_demographics,
         cache_dir=cache_dir / "test" if cache_dir is not None else None,
         cache_prefix="test",
+        aux_feature_lookup=mmse_aux_feature_lookup,
     )
-
-    training_config = config.get("training", {})
-    staged_unfreeze = training_config.get("staged_unfreeze")
-    batch_size = int(training_config.get("batch_size", 2))
-    num_workers = int(training_config.get("num_workers", 0))
-    num_classes = int(model_config.get("num_classes", len(ADNI_LABEL_TO_INDEX)))
 
     sampler_strategy = str(training_config.get("sampler", "none")).lower()
     train_sampler = None
@@ -462,6 +610,7 @@ def main() -> None:
         "class_weights": results["class_weights"],
         "class_weighting": class_weight_mode,
         "sampler_strategy": sampler_strategy,
+        "mmse_aux_features": mmse_aux_metadata or {"enabled": False},
         "split_source": split_source,
         "split_file": str(split_file) if split_file is not None else None,
     }
