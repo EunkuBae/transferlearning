@@ -58,6 +58,7 @@ def train_adni_classifier(
 
     epochs = int(training_config.get("epochs", 20))
     for epoch in range(1, epochs + 1):
+        _apply_staged_unfreeze_if_needed(model, training_config, epoch)
         train_loss = _run_epoch(model, train_loader, optimizer, criterion, device, scaler, mixed_precision)
         val_metrics = evaluate_classification_model(model, val_loader, device, num_classes=num_classes)
         epoch_summary = {
@@ -205,6 +206,50 @@ def _build_scheduler(training_config: dict, optimizer):
             min_lr=float(training_config.get("scheduler_min_lr", 1e-6)),
         )
     raise ValueError(f"Unsupported scheduler: {scheduler_name}")
+
+
+def _apply_staged_unfreeze_if_needed(model, training_config: dict, epoch: int) -> None:
+    staged_unfreeze = training_config.get("staged_unfreeze")
+    if not isinstance(staged_unfreeze, dict):
+        return
+
+    unfreeze_epoch = int(staged_unfreeze.get("epoch", 0))
+    if unfreeze_epoch <= 0 or epoch != unfreeze_epoch:
+        return
+
+    if not hasattr(model, "backbone") or not hasattr(model.backbone, "features"):
+        raise ValueError("staged_unfreeze requires a model with backbone.features")
+
+    total_stages = len(model.backbone.features) // 4
+    target = staged_unfreeze.get("trainable_backbone_stages_after")
+    if target in {None, "all"}:
+        trainable_backbone_stages = total_stages
+    else:
+        trainable_backbone_stages = int(target)
+
+    _set_trainable_backbone_stages(model, trainable_backbone_stages)
+    display_value = trainable_backbone_stages if trainable_backbone_stages < total_stages else "all"
+    print(f"Staged unfreeze applied at epoch {epoch}: trainable_backbone_stages={display_value}")
+
+
+def _set_trainable_backbone_stages(model, trainable_backbone_stages: int) -> None:
+    for parameter in model.backbone.parameters():
+        parameter.requires_grad = False
+
+    total_stages = len(model.backbone.features) // 4
+    if trainable_backbone_stages >= total_stages:
+        for parameter in model.backbone.parameters():
+            parameter.requires_grad = True
+        return
+
+    if trainable_backbone_stages <= 0:
+        return
+
+    modules_per_stage = 4
+    start_module_index = max(0, (total_stages - trainable_backbone_stages) * modules_per_stage)
+    for module in model.backbone.features[start_module_index:]:
+        for parameter in module.parameters():
+            parameter.requires_grad = True
 
 
 def _resolve_device(device_name: str):

@@ -152,6 +152,7 @@ def write_summary_report(path: Path, payload: dict) -> None:
         f"Load mode: {payload['load_mode']}",
         f"Freeze backbone: {payload['freeze_backbone']}",
         f"Trainable backbone stages: {payload.get('trainable_backbone_stages', 'all')}",
+        f"Staged unfreeze: {payload.get('staged_unfreeze', 'none')}",
         f"Use demographics: {payload['use_demographics']}",
         f"Selection metric: {payload['selection_metric']}",
         f"Class weighting: {payload.get('class_weighting', 'none')}",
@@ -387,6 +388,7 @@ def main() -> None:
     )
 
     training_config = config.get("training", {})
+    staged_unfreeze = training_config.get("staged_unfreeze")
     batch_size = int(training_config.get("batch_size", 2))
     num_workers = int(training_config.get("num_workers", 0))
     num_classes = int(model_config.get("num_classes", len(ADNI_LABEL_TO_INDEX)))
@@ -447,6 +449,7 @@ def main() -> None:
         "load_mode": str(transfer_config.get("load_mode", "backbone")),
         "freeze_backbone": bool(transfer_config.get("freeze_backbone", False)),
         "trainable_backbone_stages": trainable_backbone_stages,
+        "staged_unfreeze": staged_unfreeze,
         "num_examples": len(examples),
         "split_sizes": {key: len(value) for key, value in split_sets.items()},
         "label_mapping": ADNI_LABEL_TO_INDEX,
