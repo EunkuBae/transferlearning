@@ -22,8 +22,6 @@ data:
     target_column: mmse
     age_column: age
     sex_column: gender
-    filter_column: diagnosis
-    filter_values: [normal, control, cn, nc, cognitively normal, 0, 0.0]
     domain_name: oasis_nc
     domain_index: 1
 
