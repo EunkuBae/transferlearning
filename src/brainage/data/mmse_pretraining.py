@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 import random
@@ -13,6 +14,45 @@ try:
 except ModuleNotFoundError:
     load_workbook = None
 
+
+
+
+def _resolve_metadata_column(column_index: dict[str, int], desired_name: str) -> str:
+    normalized = {name.strip().lower(): name for name in column_index}
+    key = desired_name.strip().lower()
+    if key not in normalized:
+        raise KeyError(f"Column '{desired_name}' was not found in OASIS headers: {sorted(column_index)}")
+    return normalized[key]
+
+
+def _resolve_first_matching_column(column_index: dict[str, int], candidates: Iterable[str] | None) -> str | None:
+    if candidates is None:
+        return None
+    normalized = {name.strip().lower(): name for name in column_index}
+    for candidate in candidates:
+        key = str(candidate).strip().lower()
+        if key in normalized:
+            return normalized[key]
+    return None
+
+
+def _normalize_filter_value(value) -> str:
+    text = str(value or "").strip().lower()
+    if text in {"0", "0.0", "cdr 0", "cdr=0"}:
+        return "normal"
+    return text
+
+
+def _default_oasis_filter_column_candidates() -> list[str]:
+    return [
+        "diagnosis",
+        "dx",
+        "group",
+        "cdr",
+        "cdr_global",
+        "clinical dementia rating",
+        "cdr-sb",
+    ]
 
 @dataclass(frozen=True)
 class MultiSourceMMSEExample:
@@ -98,16 +138,22 @@ def discover_oasis_source_examples(
 
     header = [str(value).strip() if value is not None else "" for value in rows[0]]
     column_index = {name: idx for idx, name in enumerate(header)}
-    required = [subject_id_column, target_column, age_column, sex_column]
-    missing = [name for name in required if name not in column_index]
-    if missing:
-        raise KeyError(f"Missing required OASIS metadata columns: {missing}")
-    if filter_column and filter_column not in column_index:
-        raise KeyError(f"Missing OASIS filter column: {filter_column}")
+    subject_id_column = _resolve_metadata_column(column_index, subject_id_column)
+    target_column = _resolve_metadata_column(column_index, target_column)
+    age_column = _resolve_metadata_column(column_index, age_column)
+    sex_column = _resolve_metadata_column(column_index, sex_column)
+
+    filter_column_name = None
+    filter_candidates = []
+    if filter_column:
+        filter_candidates.append(filter_column)
+    filter_candidates.extend(_default_oasis_filter_column_candidates())
+    filter_column_name = _resolve_first_matching_column(column_index, filter_candidates)
 
     normalized_filter_values = None
-    if filter_column and filter_values:
-        normalized_filter_values = {str(value).strip().lower() for value in filter_values}
+    if filter_values:
+        normalized_filter_values = {_normalize_filter_value(value) for value in filter_values}
+        normalized_filter_values.update({"normal", "control", "cn", "nc", "cognitively normal"})
 
     examples: list[MultiSourceMMSEExample] = []
     seen_subject_ids: set[str] = set()
@@ -118,7 +164,9 @@ def discover_oasis_source_examples(
         sex_value = str(row[column_index[sex_column]] or "").strip().upper()
 
         if normalized_filter_values is not None:
-            filter_value = str(row[column_index[filter_column]] or "").strip().lower()
+            if filter_column_name is None:
+                raise KeyError(f"Missing OASIS filter column. Available headers: {sorted(column_index)}")
+            filter_value = _normalize_filter_value(row[column_index[filter_column_name]])
             if filter_value not in normalized_filter_values:
                 continue
 
