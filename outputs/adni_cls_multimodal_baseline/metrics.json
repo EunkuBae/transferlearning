@@ -1,0 +1,105 @@
+{
+  "experiment_name": "adni_cls_multimodal_baseline_linux",
+  "use_demographics": true,
+  "num_examples": 186,
+  "split_sizes": {
+    "train": 132,
+    "val": 27,
+    "test": 27
+  },
+  "label_mapping": {
+    "NC": 0,
+    "MCI": 1,
+    "AD": 2
+  },
+  "device": "cuda",
+  "selection_metric": "balanced_accuracy",
+  "best_val_metrics": {
+    "accuracy": 0.25925925925925924,
+    "balanced_accuracy": 0.40740740740740744,
+    "macro_precision": 0.39999999999999997,
+    "macro_recall": 0.40740740740740744,
+    "macro_f1": 0.23232323232323235,
+    "confusion_matrix": [
+      [
+        2,
+        0,
+        7
+      ],
+      [
+        0,
+        0,
+        13
+      ],
+      [
+        0,
+        0,
+        5
+      ]
+    ],
+    "per_class_precision": {
+      "0": 1.0,
+      "1": 0.0,
+      "2": 0.2
+    },
+    "per_class_recall": {
+      "0": 0.2222222222222222,
+      "1": 0.0,
+      "2": 1.0
+    },
+    "per_class_f1": {
+      "0": 0.3636363636363636,
+      "1": 0.0,
+      "2": 0.33333333333333337
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.14814814814814814,
+    "balanced_accuracy": 0.26666666666666666,
+    "macro_precision": 0.05333333333333334,
+    "macro_recall": 0.26666666666666666,
+    "macro_f1": 0.08888888888888889,
+    "confusion_matrix": [
+      [
+        0,
+        0,
+        9
+      ],
+      [
+        1,
+        0,
+        12
+      ],
+      [
+        1,
+        0,
+        4
+      ]
+    ],
+    "per_class_precision": {
+      "0": 0.0,
+      "1": 0.0,
+      "2": 0.16
+    },
+    "per_class_recall": {
+      "0": 0.0,
+      "1": 0.0,
+      "2": 0.8
+    },
+    "per_class_f1": {
+      "0": 0.0,
+      "1": 0.0,
+      "2": 0.26666666666666666
+    }
+  },
+  "checkpoint_path": "/home/user/modeling/outputs/adni_cls_multimodal_baseline/best_model.pt",
+  "class_weights": [
+    1.047619104385376,
+    0.7213114500045776,
+    1.517241358757019
+  ],
+  "class_weighting": "balanced",
+  "sampler_strategy": "balanced",
+  "split_source": "existing_split_file",
+  "split_file": "/home/user/modeling/data/splits/adni_cls_seed42.csv"
+}
