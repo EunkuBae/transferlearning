@@ -6,14 +6,6 @@ BRANCH="${BRANCH:-main}"
 COMMIT_MSG="${COMMIT_MSG:-Update experiment results from Linux training run}"
 REMOTE_NAME="${REMOTE_NAME:-origin}"
 
-RESULT_FILENAMES=(
-  metrics.json
-  history.json
-  resolved_paths.json
-  test_predictions.csv
-  training_summary.txt
-)
-
 cd "$REPO_DIR"
 
 if [ ! -d .git ]; then
@@ -27,17 +19,19 @@ collect_result_files() {
     return 0
   fi
 
-  find "$search_root" -type f \( \
-    -name "metrics.json" -o \
-    -name "history.json" -o \
-    -name "resolved_paths.json" -o \
-    -name "test_predictions.csv" -o \
-    -name "training_summary.txt" \
-  \) -print0
+  find "$search_root" \
+    \( -type d \( -name run_history -o -name cache -o -name checkpoints -o -name attributions -o -name similarities -o -name figures -o -name tables -o -name predictions \) -prune \) -o \
+    \( -type f \( \
+      -name "metrics.json" -o \
+      -name "history.json" -o \
+      -name "resolved_paths.json" -o \
+      -name "test_predictions.csv" -o \
+      -name "training_summary.txt" \
+    \) -print0 \)
 }
 
-# Stage updates to already-tracked files first.
-git add -u outputs configs/experiment/outputs scripts || true
+# Stage updates to already-tracked result files first.
+git add -u outputs configs/experiment/outputs || true
 
 # Stage canonical lightweight result artifacts from current output trees.
 while IFS= read -r -d '' path; do
@@ -56,7 +50,7 @@ if [ -f "outputs/metrics/experiment_runs.jsonl" ]; then
   git add -f -- "outputs/metrics/experiment_runs.jsonl"
 fi
 
-# Keep optional seed summaries if they exist.
+# Keep optional aggregated summaries if they exist.
 if [ -f "outputs/metrics/adni_classification_seed_summary.json" ]; then
   git add -f -- "outputs/metrics/adni_classification_seed_summary.json"
 fi
