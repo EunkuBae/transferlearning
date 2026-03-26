@@ -2,6 +2,43 @@
 
 This repository is developed on Windows and executed on Linux GPU machines. The code should run in both places by switching config files and environment variables instead of editing source code.
 
+## Current Study Direction
+
+The current paper direction is:
+
+- learn a healthy-aging, MMSE-informed 3D MRI backbone
+- test same-task transfer to external MMSE prediction
+- test cross-task transfer to ADNI diagnosis classification
+- quantify cross-cohort robustness
+
+The most up-to-date project handover is:
+
+- [`handover.md`](./handover.md)
+
+## Current Status Snapshot
+
+What is already working:
+
+- HCP MMSE baseline pretraining
+- HCP multimodal MMSE baseline
+- OASIS MMSE transfer
+- ADNI scratch diagnosis classification
+- ADNI transfer variants
+- LODO MMSE evaluation
+- multi-source healthy MMSE pretraining
+- timestamped experiment tracking and lightweight Git-friendly result saving
+
+Current high-level conclusions:
+
+- multi-source healthy MMSE pretraining improves OASIS same-task transfer
+- ADNI disease-classification transfer still collapses in current settings
+- LODO still shows a large external generalization gap
+
+Useful result registries:
+
+- [`outputs/metrics/experiment_runs.csv`](./outputs/metrics/experiment_runs.csv)
+- [`outputs/metrics/experiment_runs.jsonl`](./outputs/metrics/experiment_runs.jsonl)
+
 ## Output Policy
 
 The canonical experiment directory is [`outputs/`](./outputs).
@@ -229,6 +266,34 @@ bash scripts/run_oasis_transfer_from_env.sh \
 
 Each transfer config writes to its own `outputs/...` directory and also records per-run execution history under `outputs/.../run_history/<timestamp>/`. The runner appends a lightweight run index to `outputs/.../run_registry.jsonl`, while the main artifacts remain `metrics.json`, `history.json`, `training_summary.txt`, and `test_predictions.csv`.
 
+## Multi-Source MMSE Pretraining
+
+The current Stage 1 extension supports healthy multi-source MMSE pretraining using:
+
+- HCP
+- OASIS healthy-only examples
+
+Configs:
+
+- `configs/experiment/mmse_pretraining_erm.yaml`
+- `configs/experiment/mmse_pretraining_groupdro.yaml`
+
+Linux example:
+
+```bash
+cd ~/modeling
+source configs/environment/ubuntu_data_layout.env
+
+bash scripts/run_mmse_pretraining_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/mmse_pretraining_erm.yaml
+```
+
+Current interpretation:
+
+- `ERM` is the strongest Stage 1 result so far
+- the current `GroupDRO` setup is not yet stable enough to treat as a positive result
+
 
 ## ADNI Classification Baseline
 
@@ -249,6 +314,43 @@ bash scripts/run_adni_classification_from_env.sh \
 ```
 
 This baseline uses a frozen split manifest at `data/splits/adni_cls_seed42.csv` once the first run creates it, so later ADNI classification experiments stay directly comparable.
+
+## ADNI Transfer
+
+The ADNI transfer stage tests whether an MMSE-pretrained backbone helps diagnosis classification.
+
+Implemented variants include:
+
+- full fine-tuning
+- freeze backbone
+- partial freeze
+- staged unfreezing
+- MMSE auxiliary tabular features
+- multi-task classification plus MMSE regression
+
+Representative configs:
+
+- `configs/experiment/adni_cls_transfer_staged_last1_to_all.yaml`
+- `configs/experiment/adni_cls_transfer_multisource_erm_staged_last1_to_all.yaml`
+- `configs/experiment/adni_cls_transfer_multisource_erm_mmse_aux_staged_last1_to_all.yaml`
+- `configs/experiment/adni_cls_transfer_multisource_erm_multitask_staged_last1_to_all.yaml`
+
+Linux example:
+
+```bash
+cd ~/modeling
+source configs/environment/ubuntu_data_layout.env
+
+bash scripts/run_adni_transfer_from_env.sh \
+  configs/environment/ubuntu_data_layout.env \
+  configs/experiment/adni_cls_transfer_multisource_erm_multitask_staged_last1_to_all.yaml
+```
+
+Current interpretation:
+
+- ADNI scratch baseline is still the most interpretable classifier
+- transfer variants currently tend to collapse to a single class
+- Stage 2B is the main unresolved modeling problem
 
 ## Tailscale And Tmux
 

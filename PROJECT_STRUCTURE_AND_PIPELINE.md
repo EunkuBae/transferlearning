@@ -12,6 +12,42 @@ This project is designed to support the MIA submission strategy:
 - transferability analysis
 - explainability stability analysis
 
+## 1B. Current Paper Framing
+
+The project is now organized around the following staged question:
+
+1. learn a healthy-aging, MMSE-informed backbone from structural MRI
+2. test same-task transfer to OASIS MMSE regression
+3. test cross-task transfer to ADNI diagnosis classification
+4. quantify cross-cohort robustness with LODO-style evaluation
+5. add repeated-seed summaries and lightweight explainability later
+
+Important interpretation:
+
+- healthy cohorts are used for cognition-informed pretraining
+- this is not disease-supervised pretraining
+- DG belongs to the pretraining stage
+- TL belongs to downstream task adaptation
+
+## 1C. Current Implementation Snapshot
+
+The repository now already contains working versions of:
+
+- HCP MMSE baseline training
+- OASIS MMSE transfer
+- ADNI scratch classification
+- ADNI transfer variants
+- LODO MMSE evaluation
+- multi-source healthy MMSE pretraining with ERM and a first GroupDRO variant
+- repeated-seed utilities for ADNI classification
+- timestamped experiment tracking and run aggregation
+
+The current strongest empirical findings are:
+
+- multi-source ERM helps OASIS same-task transfer
+- ADNI transfer remains unstable and often collapses to a single class
+- current GroupDRO is not yet a positive result
+
 The design below assumes the first implementation target is:
 
 - baseline: `TL`
@@ -332,6 +368,12 @@ Variants:
 - regression only
 - multitask classification + MMSE regression
 
+Current status:
+
+- implemented and running
+- OASIS regression transfer is the strongest downstream result
+- ADNI classification transfer remains the bottleneck
+
 Outputs:
 
 - pretrained checkpoints
@@ -368,6 +410,11 @@ Outputs:
 - `outputs/metrics/lodo_dann.csv`
 - `outputs/metrics/lodo_groupdro.csv`
 - `outputs/tables/ablation_main_table.csv`
+
+Current status:
+
+- a first `GroupDRO` variant is implemented for multi-source MMSE pretraining
+- current result is weaker than ERM and should be treated as preliminary
 
 ### Phase 6. Transferability analysis
 
@@ -445,6 +492,11 @@ Outputs:
 - `outputs/attributions/`
 - `outputs/metrics/stability_summary.csv`
 - `outputs/figures/stability_comparison.png`
+
+Current status:
+
+- repeated-seed utilities exist for ADNI classification
+- lightweight occlusion and stability experiments are still pending
 
 ### Phase 8. Reporting and manuscript asset generation
 
@@ -599,3 +651,37 @@ The next practical files to create are:
    - subject record definition
 
 These five artifacts are enough to start implementation without losing the research logic.
+
+---
+
+## 11. Current Result Summary
+
+### Stage 1
+
+- HCP MMSE baseline is working
+- HCP multimodal MMSE baseline is slightly better than MRI-only
+- multi-source healthy ERM pretraining is currently the best Stage 1 extension
+- current GroupDRO setup underperforms ERM
+
+### Stage 2A
+
+- OASIS MMSE transfer clearly benefits from multi-source ERM pretraining
+- this is the cleanest positive result in the project so far
+
+### Stage 2B
+
+- ADNI scratch baseline is weak but still more meaningful than current transfer collapse
+- transfer variants repeatedly predict a single dominant class
+- HCP-pretrained, multi-source ERM-pretrained, MMSE-auxiliary, and multi-task variants have not solved this yet
+
+### Stage 3
+
+- LODO shows a substantial external generalization gap
+- it is currently more useful as a diagnostic result than as a solved benchmark
+
+### Practical manuscript implication
+
+The current project is strongest if written as:
+
+- a successful healthy MMSE pretraining and same-task transfer study
+- plus a clear limitation result showing that disease-classification transfer is not automatic
