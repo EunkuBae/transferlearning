@@ -1,0 +1,41 @@
+Experiment: lodo_mmse_adni_holdout
+Task: mmse_regression
+Device: cuda
+Checkpoint: /home/user/modeling/outputs/lodo_mmse_adni_holdout/best_model.pt
+Use demographics: False
+Loss: huber
+Selection metric: mae
+Holdout cohort: adni
+Fold name: lodo_adni_holdout
+
+Resolved Paths:
+  metadata_path: /home/user/modeling/data/metadata/merged_metadata.csv
+  split_file: /home/user/modeling/data/splits/lodo_adni_holdout.csv
+  output_dir: /home/user/modeling/outputs/lodo_mmse_adni_holdout
+  cache_dir: /home/user/modeling/outputs/cache/lodo_mmse_adni_holdout
+
+Dataset:
+  num_examples: 895
+  train: 568
+  val: 141
+  test: 186
+  cohort_counts: {'adni': 186, 'hcp': 709}
+
+Best Validation Metrics:
+  mae: 0.8432661962847338
+  mse: 1.2425101610094464
+  rmse: 1.1146793983067267
+  pearson_r: 0.2566282732048206
+  r2: 0.04432279050492238
+
+Test Metrics:
+  mae: 3.0141625865813224
+  mse: 12.362064708625175
+  rmse: 3.5159727969119974
+  pearson_r: 0.17747606119795845
+  r2: -0.5749337722639638
+
+Artifacts:
+  metrics_json: /home/user/modeling/outputs/lodo_mmse_adni_holdout/metrics.json
+  history_json: /home/user/modeling/outputs/lodo_mmse_adni_holdout/history.json
+  test_predictions_csv: /home/user/modeling/outputs/lodo_mmse_adni_holdout/test_predictions.csv

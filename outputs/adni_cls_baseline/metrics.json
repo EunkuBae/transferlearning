@@ -36,7 +36,22 @@
         5,
         0
       ]
-    ]
+    ],
+    "per_class_precision": {
+      "0": 1.0,
+      "1": 0.5652173913043478,
+      "2": 0.0
+    },
+    "per_class_recall": {
+      "0": 0.4444444444444444,
+      "1": 1.0,
+      "2": 0.0
+    },
+    "per_class_f1": {
+      "0": 0.6153846153846153,
+      "1": 0.7222222222222222,
+      "2": 0.0
+    }
   },
   "test_metrics": {
     "accuracy": 0.4444444444444444,
@@ -60,9 +75,27 @@
         4,
         0
       ]
-    ]
+    ],
+    "per_class_precision": {
+      "0": 0.25,
+      "1": 0.4782608695652174,
+      "2": 0.0
+    },
+    "per_class_recall": {
+      "0": 0.1111111111111111,
+      "1": 0.8461538461538461,
+      "2": 0.0
+    },
+    "per_class_f1": {
+      "0": 0.15384615384615383,
+      "1": 0.6111111111111112,
+      "2": 0.0
+    }
   },
   "checkpoint_path": "/home/user/modeling/outputs/adni_cls_baseline/best_model.pt",
-  "split_source": "generated_and_saved_split_file",
+  "class_weights": null,
+  "class_weighting": "none",
+  "sampler_strategy": "none",
+  "split_source": "existing_split_file",
   "split_file": "/home/user/modeling/data/splits/adni_cls_seed42.csv"
 }

@@ -1,0 +1,64 @@
+Experiment: adni_cls_transfer_full_ft
+Device: cuda
+Checkpoint: /home/user/modeling/outputs/adni_cls_transfer_full_ft/best_model.pt
+Source checkpoint: /home/user/modeling/outputs/hcp_mmse_baseline/best_model.pt
+Load mode: backbone
+Freeze backbone: False
+Use demographics: False
+Selection metric: balanced_accuracy
+Class weighting: balanced
+Sampler strategy: balanced
+
+Resolved Paths:
+  metadata_path: /data/C3_ADNI/ADNI_MPR_N3_metadata.csv
+  image_dir: /data/C3_ADNI/ADNI_MPR_N3_ALL
+  output_dir: /home/user/modeling/outputs/adni_cls_transfer_full_ft
+  cache_dir: /home/user/modeling/outputs/cache/adni_cls_transfer_full_ft
+  split_file: /home/user/modeling/data/splits/adni_cls_seed42.csv
+  split_source: existing_split_file
+
+Dataset:
+  num_examples: 186
+  train: 132
+  val: 27
+  test: 27
+
+Checkpoint Load Report:
+  loaded_keys: 24
+  missing_keys: ['head.layers.0.weight', 'head.layers.0.bias', 'head.layers.3.weight', 'head.layers.3.bias']
+  unexpected_keys: []
+  skipped_mismatched_keys: []
+
+Label Mapping:
+  NC: 0
+  MCI: 1
+  AD: 2
+
+Class Weights: [1.047619104385376, 0.7213114500045776, 1.517241358757019]
+
+Best Validation Metrics:
+  accuracy: 0.3333333333333333
+  balanced_accuracy: 0.3925925925925926
+  macro_precision: 0.2393939393939394
+  macro_recall: 0.3925925925925926
+  macro_f1: 0.2838709677419355
+  confusion_matrix: [[7, 0, 2], [12, 0, 1], [3, 0, 2]]
+  per_class_precision: {'0': 0.3181818181818182, '1': 0.0, '2': 0.4}
+  per_class_recall: {'0': 0.7777777777777778, '1': 0.0, '2': 0.4}
+  per_class_f1: {'0': 0.45161290322580644, '1': 0.0, '2': 0.4000000000000001}
+
+Test Metrics:
+  accuracy: 0.2962962962962963
+  balanced_accuracy: 0.2962962962962963
+  macro_precision: 0.11594202898550725
+  macro_recall: 0.2962962962962963
+  macro_f1: 0.16666666666666666
+  confusion_matrix: [[8, 0, 1], [10, 0, 3], [5, 0, 0]]
+  per_class_precision: {'0': 0.34782608695652173, '1': 0.0, '2': 0.0}
+  per_class_recall: {'0': 0.8888888888888888, '1': 0.0, '2': 0.0}
+  per_class_f1: {'0': 0.5, '1': 0.0, '2': 0.0}
+
+Artifacts:
+  metrics_json: /home/user/modeling/outputs/adni_cls_transfer_full_ft/metrics.json
+  history_json: /home/user/modeling/outputs/adni_cls_transfer_full_ft/history.json
+  test_predictions_csv: /home/user/modeling/outputs/adni_cls_transfer_full_ft/test_predictions.csv

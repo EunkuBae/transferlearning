@@ -1,0 +1,8 @@
+{
+  "config_path": "/home/user/modeling/configs/experiment/lodo_mmse_adni_holdout.yaml",
+  "metadata_path": "/home/user/modeling/data/metadata/merged_metadata.csv",
+  "split_file": "/home/user/modeling/data/splits/lodo_adni_holdout.csv",
+  "data_root": "/data",
+  "output_dir": "/home/user/modeling/outputs/lodo_mmse_adni_holdout",
+  "cache_dir": "/home/user/modeling/outputs/cache/lodo_mmse_adni_holdout"
+}
