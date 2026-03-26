@@ -1,0 +1,125 @@
+{
+  "experiment_name": "adni_cls_multimodal_transfer_staged_last1_to_all",
+  "use_demographics": true,
+  "source_checkpoint_path": "/home/user/modeling/outputs/hcp_mmse_multimodal_baseline/best_model.pt",
+  "load_mode": "full",
+  "freeze_backbone": false,
+  "trainable_backbone_stages": 1,
+  "staged_unfreeze": {
+    "epoch": 6,
+    "trainable_backbone_stages_after": "all"
+  },
+  "num_examples": 186,
+  "split_sizes": {
+    "train": 132,
+    "val": 27,
+    "test": 27
+  },
+  "label_mapping": {
+    "NC": 0,
+    "MCI": 1,
+    "AD": 2
+  },
+  "device": "cuda",
+  "selection_metric": "balanced_accuracy",
+  "best_val_metrics": {
+    "accuracy": 0.3333333333333333,
+    "balanced_accuracy": 0.3333333333333333,
+    "macro_precision": 0.1111111111111111,
+    "macro_recall": 0.3333333333333333,
+    "macro_f1": 0.16666666666666666,
+    "confusion_matrix": [
+      [
+        9,
+        0,
+        0
+      ],
+      [
+        13,
+        0,
+        0
+      ],
+      [
+        5,
+        0,
+        0
+      ]
+    ],
+    "per_class_precision": {
+      "0": 0.3333333333333333,
+      "1": 0.0,
+      "2": 0.0
+    },
+    "per_class_recall": {
+      "0": 1.0,
+      "1": 0.0,
+      "2": 0.0
+    },
+    "per_class_f1": {
+      "0": 0.5,
+      "1": 0.0,
+      "2": 0.0
+    }
+  },
+  "checkpoint_load_report": {
+    "loaded_keys": 28,
+    "missing_keys": [
+      "head.layers.3.weight",
+      "head.layers.3.bias"
+    ],
+    "unexpected_keys": [],
+    "skipped_mismatched_keys": [
+      "head.layers.3.weight",
+      "head.layers.3.bias"
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.3333333333333333,
+    "balanced_accuracy": 0.3333333333333333,
+    "macro_precision": 0.1111111111111111,
+    "macro_recall": 0.3333333333333333,
+    "macro_f1": 0.16666666666666666,
+    "confusion_matrix": [
+      [
+        9,
+        0,
+        0
+      ],
+      [
+        13,
+        0,
+        0
+      ],
+      [
+        5,
+        0,
+        0
+      ]
+    ],
+    "per_class_precision": {
+      "0": 0.3333333333333333,
+      "1": 0.0,
+      "2": 0.0
+    },
+    "per_class_recall": {
+      "0": 1.0,
+      "1": 0.0,
+      "2": 0.0
+    },
+    "per_class_f1": {
+      "0": 0.5,
+      "1": 0.0,
+      "2": 0.0
+    }
+  },
+  "checkpoint_path": "/home/user/modeling/outputs/adni_cls_multimodal_transfer_staged_last1_to_all/best_model.pt",
+  "class_weights": [
+    1.047619104385376,
+    0.7213114500045776,
+    1.517241358757019
+  ],
+  "class_weighting": "balanced",
+  "sampler_strategy": "none",
+  "split_source": "existing_split_file",
+  "split_file": "/home/user/modeling/data/splits/adni_cls_seed42.csv"
+}
