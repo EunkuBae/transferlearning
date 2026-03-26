@@ -1,0 +1,322 @@
+[
+  {
+    "epoch": 1,
+    "train_loss": 14.160936162712868,
+    "learning_rate": 0.0001,
+    "val_mae": 1.8989646936717786,
+    "val_rmse": 2.413103371286769,
+    "val_pearson_r": 0.26229221652572376,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 14.305097175366951,
+      "oasis_nc": 13.87290672019676
+    }
+  },
+  {
+    "epoch": 2,
+    "train_loss": 1.9605092252238412,
+    "learning_rate": 0.0001,
+    "val_mae": 2.4385142702805367,
+    "val_rmse": 2.8328384972066556,
+    "val_pearson_r": 0.42254424306984356,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.707321310491771,
+      "oasis_nc": 2.526185453607795
+    }
+  },
+  {
+    "epoch": 3,
+    "train_loss": 2.0233426897713307,
+    "learning_rate": 0.0001,
+    "val_mae": 1.8468799716547917,
+    "val_rmse": 2.374319177248278,
+    "val_pearson_r": 0.195720909351677,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.7669402331840702,
+      "oasis_nc": 2.6557989273479277
+    }
+  },
+  {
+    "epoch": 4,
+    "train_loss": 1.8725555077027738,
+    "learning_rate": 0.0001,
+    "val_mae": 2.4882191733310095,
+    "val_rmse": 2.8890404152629987,
+    "val_pearson_r": -0.17556538333605265,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.5660862432462033,
+      "oasis_nc": 2.7139658610026043
+    }
+  },
+  {
+    "epoch": 5,
+    "train_loss": 2.0187182480029846,
+    "learning_rate": 0.0001,
+    "val_mae": 2.0648126100239,
+    "val_rmse": 2.8745151750832467,
+    "val_pearson_r": 0.37041339209762847,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.831795285423968,
+      "oasis_nc": 2.6200870090060766
+    }
+  },
+  {
+    "epoch": 6,
+    "train_loss": 1.8756417263759655,
+    "learning_rate": 0.0001,
+    "val_mae": 3.250202091116654,
+    "val_rmse": 3.5123227466000633,
+    "val_pearson_r": 0.4211045637888731,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.6167152404785157,
+      "oasis_nc": 2.4508302145164107
+    }
+  },
+  {
+    "epoch": 7,
+    "train_loss": 1.8892349071716994,
+    "learning_rate": 0.0001,
+    "val_mae": 2.4777471140811316,
+    "val_rmse": 2.818631182725384,
+    "val_pearson_r": 0.18024828844720334,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.6104357489224137,
+      "oasis_nc": 2.4056290187192766
+    }
+  },
+  {
+    "epoch": 8,
+    "train_loss": 1.7227925504191537,
+    "learning_rate": 5e-05,
+    "val_mae": 1.448175355007774,
+    "val_rmse": 2.577019504274562,
+    "val_pearson_r": -0.2771564350278737,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.401939060377038,
+      "oasis_nc": 2.392150541695442
+    }
+  },
+  {
+    "epoch": 9,
+    "train_loss": 1.8590384494052845,
+    "learning_rate": 5e-05,
+    "val_mae": 1.666949372542532,
+    "val_rmse": 2.8032147694630294,
+    "val_pearson_r": -0.11553048351131134,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.6437973529550605,
+      "oasis_nc": 2.479587916324013
+    }
+  },
+  {
+    "epoch": 10,
+    "train_loss": 1.781355954288097,
+    "learning_rate": 5e-05,
+    "val_mae": 1.6930952072143555,
+    "val_rmse": 2.2262933828188207,
+    "val_pearson_r": 0.38215052668022637,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.5578811132215213,
+      "oasis_nc": 2.3929554929015455
+    }
+  },
+  {
+    "epoch": 11,
+    "train_loss": 1.957029878423455,
+    "learning_rate": 5e-05,
+    "val_mae": 1.775471147738005,
+    "val_rmse": 2.253941859419978,
+    "val_pearson_r": 0.4026993630237385,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.6977460616060933,
+      "oasis_nc": 2.643287230073736
+    }
+  },
+  {
+    "epoch": 12,
+    "train_loss": 1.7729627630683813,
+    "learning_rate": 5e-05,
+    "val_mae": 1.7171976817281622,
+    "val_rmse": 2.612715545518727,
+    "val_pearson_r": 0.4184658013727274,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.5129341371597782,
+      "oasis_nc": 2.46839895756287
+    }
+  },
+  {
+    "epoch": 13,
+    "train_loss": 1.807447112008427,
+    "learning_rate": 2.5e-05,
+    "val_mae": 1.6522794648220664,
+    "val_rmse": 2.2642086724880897,
+    "val_pearson_r": 0.226252207632369,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.4904250372023808,
+      "oasis_nc": 2.405493023751796
+    }
+  },
+  {
+    "epoch": 14,
+    "train_loss": 1.8667897428019662,
+    "learning_rate": 2.5e-05,
+    "val_mae": 1.3542645855953819,
+    "val_rmse": 2.1048858960849515,
+    "val_pearson_r": 0.3854407197899913,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.527525895796482,
+      "oasis_nc": 2.6836665094235523
+    }
+  },
+  {
+    "epoch": 15,
+    "train_loss": 1.7831991817174333,
+    "learning_rate": 2.5e-05,
+    "val_mae": 1.8114513848957263,
+    "val_rmse": 2.4005312629016617,
+    "val_pearson_r": -0.04530416464161298,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.5112088600300855,
+      "oasis_nc": 2.3591399640668165
+    }
+  },
+  {
+    "epoch": 16,
+    "train_loss": 1.7892989255069347,
+    "learning_rate": 2.5e-05,
+    "val_mae": 1.3452339046879818,
+    "val_rmse": 2.123673345205686,
+    "val_pearson_r": 0.4356770841854527,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.5288280730551862,
+      "oasis_nc": 2.3638756934632648
+    }
+  },
+  {
+    "epoch": 17,
+    "train_loss": 1.8149751813224193,
+    "learning_rate": 2.5e-05,
+    "val_mae": 1.540951640982377,
+    "val_rmse": 2.1125017875463468,
+    "val_pearson_r": 0.42722683487895424,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.5598902274211495,
+      "oasis_nc": 2.5175351991758244
+    }
+  },
+  {
+    "epoch": 18,
+    "train_loss": 1.812135332086113,
+    "learning_rate": 2.5e-05,
+    "val_mae": 1.3854594105168392,
+    "val_rmse": 2.1472208729638553,
+    "val_pearson_r": 0.3574973034756527,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.5074190806193524,
+      "oasis_nc": 2.358893109865838
+    }
+  },
+  {
+    "epoch": 19,
+    "train_loss": 1.7688754649644487,
+    "learning_rate": 2.5e-05,
+    "val_mae": 1.473773103011282,
+    "val_rmse": 2.1586201680703168,
+    "val_pearson_r": 0.35657428745414366,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.5133840020200544,
+      "oasis_nc": 2.4423838297526044
+    }
+  },
+  {
+    "epoch": 20,
+    "train_loss": 1.8181956430499473,
+    "learning_rate": 2.5e-05,
+    "val_mae": 1.3330228328704834,
+    "val_rmse": 2.2311767121968824,
+    "val_pearson_r": 0.39087294970607084,
+    "group_weights": {
+      "hcp": 0.5,
+      "oasis_nc": 0.5
+    },
+    "train_domain_losses": {
+      "hcp": 1.559500530872761,
+      "oasis_nc": 2.441434393988715
+    }
+  }
+]

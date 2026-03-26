@@ -1,0 +1,10 @@
+{
+  "config_path": "/home/user/modeling/configs/experiment/mmse_pretraining_erm.yaml",
+  "runtime_root": "/home/user/modeling",
+  "hcp_csv_path": "/home/user/modeling/HCP_A_id_sex_age_mmse_moca.csv",
+  "hcp_image_dir": "/data/C1_HCP/hcp_aging",
+  "oasis_metadata_path": "/home/user/modeling/OASIS_MMSE.xlsx",
+  "oasis_image_dir": "/data/C2_OASIS",
+  "output_dir": "/home/user/modeling/outputs/mmse_pretraining_erm",
+  "cache_dir": "/home/user/modeling/outputs/cache/mmse_pretraining_erm"
+}

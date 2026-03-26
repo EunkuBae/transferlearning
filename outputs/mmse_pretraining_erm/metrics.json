@@ -1,0 +1,997 @@
+{
+  "experiment_name": "mmse_pretraining_erm",
+  "use_demographics": false,
+  "dg_method": "erm",
+  "group_weights": {
+    "hcp": 0.5,
+    "oasis_nc": 0.5
+  },
+  "num_examples": 1016,
+  "split_sizes": {
+    "train": 712,
+    "val": 152,
+    "test": 152
+  },
+  "split_domain_counts": {
+    "train": {
+      "hcp": 497,
+      "oasis_nc": 215
+    },
+    "val": {
+      "hcp": 106,
+      "oasis_nc": 46
+    },
+    "test": {
+      "hcp": 106,
+      "oasis_nc": 46
+    }
+  },
+  "device": "cuda",
+  "loss_name": "huber",
+  "selection_metric": "mae",
+  "best_val_metrics": {
+    "overall": {
+      "mae": 1.3330228328704834,
+      "mse": 4.978149521049689,
+      "rmse": 2.2311767121968824,
+      "pearson_r": 0.39087294970607084,
+      "r2": 0.018432545045171778
+    },
+    "by_domain": {
+      "hcp": {
+        "mae": 0.8380993717121628,
+        "mse": 1.2231134754642452,
+        "rmse": 1.105944607773936,
+        "pearson_r": 0.2872377021085763,
+        "r2": 0.01843418253579887
+      },
+      "oasis_nc": {
+        "mae": 2.473498634670092,
+        "mse": 13.631058669572667,
+        "rmse": 3.6920263636074795,
+        "pearson_r": 0.32079917461033897,
+        "r2": -0.12792586206850332
+      }
+    },
+    "predictions": [
+      {
+        "subject_id": "HCA6062456",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.78190803527832
+      },
+      {
+        "subject_id": "HCA9743900",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.04511260986328
+      },
+      {
+        "subject_id": "HCA7502059",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.298343658447266
+      },
+      {
+        "subject_id": "HCA9503576",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.03350067138672
+      },
+      {
+        "subject_id": "HCA6753079",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.14662742614746
+      },
+      {
+        "subject_id": "HCA6214958",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.954938888549805
+      },
+      {
+        "subject_id": "HCA9734999",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.728843688964844
+      },
+      {
+        "subject_id": "HCA6954998",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.157215118408203
+      },
+      {
+        "subject_id": "HCA6566888",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.548686981201172
+      },
+      {
+        "subject_id": "HCA9551486",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.08397674560547
+      },
+      {
+        "subject_id": "HCA6320048",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.060335159301758
+      },
+      {
+        "subject_id": "HCA6731574",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.803380966186523
+      },
+      {
+        "subject_id": "HCA8596099",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.033218383789062
+      },
+      {
+        "subject_id": "HCA7840988",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.026580810546875
+      },
+      {
+        "subject_id": "HCA8247074",
+        "domain_name": "hcp",
+        "target_mmse": 26.0,
+        "predicted_mmse": 28.621185302734375
+      },
+      {
+        "subject_id": "HCA8405975",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.855764389038086
+      },
+      {
+        "subject_id": "HCA7898818",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.422809600830078
+      },
+      {
+        "subject_id": "HCA9708190",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.58380126953125
+      },
+      {
+        "subject_id": "HCA7046968",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.1332950592041
+      },
+      {
+        "subject_id": "HCA7620469",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.425884246826172
+      },
+      {
+        "subject_id": "HCA6671178",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.055238723754883
+      },
+      {
+        "subject_id": "HCA6780082",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.06844711303711
+      },
+      {
+        "subject_id": "HCA8345882",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.521774291992188
+      },
+      {
+        "subject_id": "HCA7222154",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.099578857421875
+      },
+      {
+        "subject_id": "HCA7964401",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.629987716674805
+      },
+      {
+        "subject_id": "HCA6053758",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.14647102355957
+      },
+      {
+        "subject_id": "HCA7773393",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.69619369506836
+      },
+      {
+        "subject_id": "HCA7825487",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.779727935791016
+      },
+      {
+        "subject_id": "HCA9679715",
+        "domain_name": "hcp",
+        "target_mmse": 25.0,
+        "predicted_mmse": 28.849035263061523
+      },
+      {
+        "subject_id": "HCA7271369",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 29.301185607910156
+      },
+      {
+        "subject_id": "HCA7627786",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.994705200195312
+      },
+      {
+        "subject_id": "HCA6363167",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.022476196289062
+      },
+      {
+        "subject_id": "HCA8307773",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.089427947998047
+      },
+      {
+        "subject_id": "HCA6374576",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.410297393798828
+      },
+      {
+        "subject_id": "HCA8529892",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.293407440185547
+      },
+      {
+        "subject_id": "HCA6144862",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.12091827392578
+      },
+      {
+        "subject_id": "HCA8296592",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.15915298461914
+      },
+      {
+        "subject_id": "HCA9231670",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.59516143798828
+      },
+      {
+        "subject_id": "HCA8363278",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.689184188842773
+      },
+      {
+        "subject_id": "HCA7260869",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.71474838256836
+      },
+      {
+        "subject_id": "HCA6102038",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.585182189941406
+      },
+      {
+        "subject_id": "HCA7296183",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.530582427978516
+      },
+      {
+        "subject_id": "HCA8206666",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.43865203857422
+      },
+      {
+        "subject_id": "HCA7987312",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.50497817993164
+      },
+      {
+        "subject_id": "HCA9554088",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.891756057739258
+      },
+      {
+        "subject_id": "HCA9058682",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.167692184448242
+      },
+      {
+        "subject_id": "HCA9341879",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.86294937133789
+      },
+      {
+        "subject_id": "HCA9599212",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.91698455810547
+      },
+      {
+        "subject_id": "HCA7319472",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.149314880371094
+      },
+      {
+        "subject_id": "HCA9286392",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.028919219970703
+      },
+      {
+        "subject_id": "HCA7715581",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.142045974731445
+      },
+      {
+        "subject_id": "HCA9771703",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.66630744934082
+      },
+      {
+        "subject_id": "HCA7222558",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.04303550720215
+      },
+      {
+        "subject_id": "HCA8578704",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.086345672607422
+      },
+      {
+        "subject_id": "HCA8192378",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.785802841186523
+      },
+      {
+        "subject_id": "HCA7541675",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.227863311767578
+      },
+      {
+        "subject_id": "HCA8927501",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.45528221130371
+      },
+      {
+        "subject_id": "HCA9750290",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.734519958496094
+      },
+      {
+        "subject_id": "HCA8536081",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.195636749267578
+      },
+      {
+        "subject_id": "HCA8141563",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.243614196777344
+      },
+      {
+        "subject_id": "HCA9369902",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.402393341064453
+      },
+      {
+        "subject_id": "HCA9589310",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.93180274963379
+      },
+      {
+        "subject_id": "HCA6896607",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.933080673217773
+      },
+      {
+        "subject_id": "HCA7467588",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.057451248168945
+      },
+      {
+        "subject_id": "HCA6972899",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.78087615966797
+      },
+      {
+        "subject_id": "HCA7980095",
+        "domain_name": "hcp",
+        "target_mmse": 25.0,
+        "predicted_mmse": 28.960081100463867
+      },
+      {
+        "subject_id": "HCA7530670",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.078125
+      },
+      {
+        "subject_id": "HCA8301963",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.08348846435547
+      },
+      {
+        "subject_id": "HCA7226566",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.17601776123047
+      },
+      {
+        "subject_id": "HCA6290368",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.725147247314453
+      },
+      {
+        "subject_id": "HCA6582684",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.999181747436523
+      },
+      {
+        "subject_id": "HCA8133362",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.80641746520996
+      },
+      {
+        "subject_id": "HCA7111650",
+        "domain_name": "hcp",
+        "target_mmse": 26.0,
+        "predicted_mmse": 28.778440475463867
+      },
+      {
+        "subject_id": "HCA7495593",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.627716064453125
+      },
+      {
+        "subject_id": "HCA6880490",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.8779296875
+      },
+      {
+        "subject_id": "HCA8434376",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.27657699584961
+      },
+      {
+        "subject_id": "HCA8674902",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.056049346923828
+      },
+      {
+        "subject_id": "HCA6741173",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.43104362487793
+      },
+      {
+        "subject_id": "HCA8058374",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.732913970947266
+      },
+      {
+        "subject_id": "HCA6909286",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.084035873413086
+      },
+      {
+        "subject_id": "HCA6166973",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.8968505859375
+      },
+      {
+        "subject_id": "HCA9319684",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.864482879638672
+      },
+      {
+        "subject_id": "HCA7438480",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.691673278808594
+      },
+      {
+        "subject_id": "HCA7716684",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.1965389251709
+      },
+      {
+        "subject_id": "HCA7447784",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.28611183166504
+      },
+      {
+        "subject_id": "HCA9512173",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.84398078918457
+      },
+      {
+        "subject_id": "HCA9469906",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.153545379638672
+      },
+      {
+        "subject_id": "HCA8854398",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.277877807617188
+      },
+      {
+        "subject_id": "HCA8740989",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.606523513793945
+      },
+      {
+        "subject_id": "HCA9744194",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.157508850097656
+      },
+      {
+        "subject_id": "HCA9628697",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.054651260375977
+      },
+      {
+        "subject_id": "HCA6269377",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.518049240112305
+      },
+      {
+        "subject_id": "HCA6326767",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.988426208496094
+      },
+      {
+        "subject_id": "HCA6388082",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.83435821533203
+      },
+      {
+        "subject_id": "HCA8702577",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.308303833007812
+      },
+      {
+        "subject_id": "HCA6125050",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.117462158203125
+      },
+      {
+        "subject_id": "HCA7716381",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.229881286621094
+      },
+      {
+        "subject_id": "HCA7050151",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 29.081096649169922
+      },
+      {
+        "subject_id": "HCA9589815",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.49556541442871
+      },
+      {
+        "subject_id": "HCA6333158",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.15100860595703
+      },
+      {
+        "subject_id": "HCA9023865",
+        "domain_name": "hcp",
+        "target_mmse": 27.0,
+        "predicted_mmse": 29.151016235351562
+      },
+      {
+        "subject_id": "HCA8743187",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.924806594848633
+      },
+      {
+        "subject_id": "HCA9787415",
+        "domain_name": "hcp",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.174724578857422
+      },
+      {
+        "subject_id": "HCA6249977",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.933162689208984
+      },
+      {
+        "subject_id": "HCA6820674",
+        "domain_name": "hcp",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.162765502929688
+      },
+      {
+        "subject_id": "HCA6618679",
+        "domain_name": "hcp",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.014928817749023
+      },
+      {
+        "subject_id": "OAS0074.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.141399383544922
+      },
+      {
+        "subject_id": "OAS0169.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.179122924804688
+      },
+      {
+        "subject_id": "OAS0238.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.785694122314453
+      },
+      {
+        "subject_id": "OAS0073.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.783397674560547
+      },
+      {
+        "subject_id": "OAS0279.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.256237030029297
+      },
+      {
+        "subject_id": "OAS0197.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.382658004760742
+      },
+      {
+        "subject_id": "OAS0039.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.4356632232666
+      },
+      {
+        "subject_id": "OAS0013.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 23.0,
+        "predicted_mmse": 28.431509017944336
+      },
+      {
+        "subject_id": "OAS0276.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 29.0,
+        "predicted_mmse": 29.632122039794922
+      },
+      {
+        "subject_id": "OAS0291.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.268489837646484
+      },
+      {
+        "subject_id": "OAS0067.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 26.0,
+        "predicted_mmse": 28.683563232421875
+      },
+      {
+        "subject_id": "OAS0146.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 21.0,
+        "predicted_mmse": 28.409053802490234
+      },
+      {
+        "subject_id": "OAS0203.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 27.858739852905273
+      },
+      {
+        "subject_id": "OAS0284.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.445249557495117
+      },
+      {
+        "subject_id": "OAS0153.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 24.0,
+        "predicted_mmse": 28.462421417236328
+      },
+      {
+        "subject_id": "OAS0280.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.838001251220703
+      },
+      {
+        "subject_id": "OAS0167.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.696516036987305
+      },
+      {
+        "subject_id": "OAS0047.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.564777374267578
+      },
+      {
+        "subject_id": "OAS0018.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 26.0,
+        "predicted_mmse": 27.72728729248047
+      },
+      {
+        "subject_id": "OAS0057.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 28.0,
+        "predicted_mmse": 27.768754959106445
+      },
+      {
+        "subject_id": "OAS0253.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.109203338623047
+      },
+      {
+        "subject_id": "OAS0142.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.3101863861084
+      },
+      {
+        "subject_id": "OAS0107.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.882200241088867
+      },
+      {
+        "subject_id": "OAS0172.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.45389175415039
+      },
+      {
+        "subject_id": "OAS0006.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.82091522216797
+      },
+      {
+        "subject_id": "OAS0222.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.3271484375
+      },
+      {
+        "subject_id": "OAS0215.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 23.0,
+        "predicted_mmse": 28.292728424072266
+      },
+      {
+        "subject_id": "OAS0065.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 24.0,
+        "predicted_mmse": 28.854446411132812
+      },
+      {
+        "subject_id": "OAS0027.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 22.0,
+        "predicted_mmse": 28.836532592773438
+      },
+      {
+        "subject_id": "OAS0094.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 27.983938217163086
+      },
+      {
+        "subject_id": "OAS0059.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 29.0,
+        "predicted_mmse": 28.955028533935547
+      },
+      {
+        "subject_id": "OAS0202.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 24.0,
+        "predicted_mmse": 27.987987518310547
+      },
+      {
+        "subject_id": "OAS0145.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 20.0,
+        "predicted_mmse": 28.134113311767578
+      },
+      {
+        "subject_id": "OAS0248.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.53252601623535
+      },
+      {
+        "subject_id": "OAS0080.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 27.0,
+        "predicted_mmse": 28.68547821044922
+      },
+      {
+        "subject_id": "OAS0177.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 28.0,
+        "predicted_mmse": 28.44720458984375
+      },
+      {
+        "subject_id": "OAS0056.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.340473175048828
+      },
+      {
+        "subject_id": "OAS0304.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 26.0,
+        "predicted_mmse": 29.52768898010254
+      },
+      {
+        "subject_id": "OAS0091.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 16.0,
+        "predicted_mmse": 28.2258358001709
+      },
+      {
+        "subject_id": "OAS0098.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 29.368574142456055
+      },
+      {
+        "subject_id": "OAS0134.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 23.0,
+        "predicted_mmse": 28.204071044921875
+      },
+      {
+        "subject_id": "OAS0139.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 18.0,
+        "predicted_mmse": 28.13983154296875
+      },
+      {
+        "subject_id": "OAS0273.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 28.0,
+        "predicted_mmse": 29.029361724853516
+      },
+      {
+        "subject_id": "OAS0158.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 29.0,
+        "predicted_mmse": 27.95159149169922
+      },
+      {
+        "subject_id": "OAS0038.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 30.0,
+        "predicted_mmse": 28.44912338256836
+      },
+      {
+        "subject_id": "OAS0101.nii",
+        "domain_name": "oasis_nc",
+        "target_mmse": 29.0,
+        "predicted_mmse": 27.917816162109375
+      }
+    ]
+  },
+  "test_metrics": {
+    "overall": {
+      "mae": 0.9919419037668329,
+      "mse": 2.8259151325770575,
+      "rmse": 1.6810458448766523,
+      "pearson_r": 0.3609878951213545,
+      "r2": 0.040516948240770456
+    },
+    "by_domain": {
+      "hcp": {
+        "mae": 0.7679400174122937,
+        "mse": 1.2254139894717329,
+        "rmse": 1.106984186640321,
+        "pearson_r": 0.4395660811862955,
+        "r2": 0.01714957629349767
+      },
+      "oasis_nc": {
+        "mae": 1.5081201636272927,
+        "mse": 6.514026462341502,
+        "rmse": 2.5522590899713733,
+        "pearson_r": 0.30788088594628543,
+        "r2": 0.0390630232630631
+      }
+    }
+  },
+  "checkpoint_path": "/home/user/modeling/outputs/mmse_pretraining_erm/best_model.pt"
+}
