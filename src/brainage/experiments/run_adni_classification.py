@@ -6,6 +6,7 @@ import argparse
 import csv
 import json
 import os
+from collections import Counter
 from pathlib import Path
 
 from brainage.data.adni_cls import (
@@ -21,7 +22,7 @@ from brainage.utils.seed import set_global_seed
 
 try:
     import torch
-    from torch.utils.data import DataLoader
+    from torch.utils.data import DataLoader, WeightedRandomSampler
 except ModuleNotFoundError as exc:  # pragma: no cover - dependency guard
     raise RuntimeError(
         "Running ADNI classification experiments requires `torch`. Install dependencies with `pip install -r requirements.txt`."
@@ -51,11 +52,12 @@ def load_config(path: Path) -> dict:
         return yaml.safe_load(handle)
 
 
-def build_dataloader(dataset, batch_size: int, shuffle: bool, num_workers: int):
+def build_dataloader(dataset, batch_size: int, shuffle: bool, num_workers: int, sampler=None):
     return DataLoader(
         dataset,
         batch_size=batch_size,
-        shuffle=shuffle,
+        shuffle=shuffle if sampler is None else False,
+        sampler=sampler,
         num_workers=num_workers,
         pin_memory=torch.cuda.is_available(),
         persistent_workers=num_workers > 0,
@@ -80,6 +82,8 @@ def write_summary_report(path: Path, payload: dict) -> None:
         f"Checkpoint: {payload['checkpoint_path']}",
         f"Use demographics: {payload['use_demographics']}",
         f"Selection metric: {payload['selection_metric']}",
+        f"Class weighting: {payload.get('class_weighting', 'none')}",
+        f"Sampler strategy: {payload.get('sampler_strategy', 'none')}",
         "",
         "Resolved Paths:",
         f"  metadata_path: {payload['resolved_paths']['metadata_path']}",
@@ -99,6 +103,8 @@ def write_summary_report(path: Path, payload: dict) -> None:
     ]
     for label_name, label_index in payload["label_mapping"].items():
         lines.append(f"  {label_name}: {label_index}")
+    if payload.get("class_weights") is not None:
+        lines.extend(["", f"Class Weights: {payload['class_weights']}"])
     lines.extend(["", "Best Validation Metrics:"])
     for key, value in payload["best_val_metrics"].items():
         lines.append(f"  {key}: {value}")
@@ -199,6 +205,29 @@ def build_or_load_split_sets(examples: list, split_config: dict, seed: int, runt
     return split_sets, split_file, split_source
 
 
+def compute_class_weights(examples: list, num_classes: int):
+    counts = Counter(ADNI_LABEL_TO_INDEX[example.diagnosis] for example in examples)
+    total = sum(counts.values())
+    weights = []
+    for class_index in range(num_classes):
+        count = counts.get(class_index, 0)
+        if count <= 0:
+            weights.append(0.0)
+        else:
+            weights.append(total / (num_classes * count))
+    return torch.tensor(weights, dtype=torch.float32)
+
+
+def build_balanced_sampler(examples: list):
+    counts = Counter(ADNI_LABEL_TO_INDEX[example.diagnosis] for example in examples)
+    sample_weights = [1.0 / counts[ADNI_LABEL_TO_INDEX[example.diagnosis]] for example in examples]
+    return WeightedRandomSampler(
+        weights=torch.tensor(sample_weights, dtype=torch.double),
+        num_samples=len(sample_weights),
+        replacement=True,
+    )
+
+
 def main() -> None:
     args = parse_args()
     config_path = args.config.resolve()
@@ -282,10 +311,31 @@ def main() -> None:
     training_config = config.get("training", {})
     batch_size = int(training_config.get("batch_size", 2))
     num_workers = int(training_config.get("num_workers", 0))
+    num_classes = int(model_config.get("num_classes", len(ADNI_LABEL_TO_INDEX)))
 
-    train_loader = build_dataloader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    sampler_strategy = str(training_config.get("sampler", "none")).lower()
+    train_sampler = None
+    if sampler_strategy == "balanced":
+        train_sampler = build_balanced_sampler(split_sets["train"])
+    elif sampler_strategy not in {"none", "off", "false", "0", ""}:
+        raise ValueError(f"Unsupported sampler strategy: {sampler_strategy}")
+
+    train_loader = build_dataloader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        sampler=train_sampler,
+    )
     val_loader = build_dataloader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     test_loader = build_dataloader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+
+    class_weight_mode = str(training_config.get("class_weighting", "none")).lower()
+    class_weights = None
+    if class_weight_mode == "balanced":
+        class_weights = compute_class_weights(split_sets["train"], num_classes=num_classes)
+    elif class_weight_mode not in {"none", "off", "false", "0", ""}:
+        raise ValueError(f"Unsupported class_weighting strategy: {class_weight_mode}")
 
     model = build_adni_classification_model(config)
     results = train_adni_classifier(
@@ -295,6 +345,7 @@ def main() -> None:
         test_loader=test_loader,
         config=config,
         output_dir=output_dir,
+        class_weights=class_weights,
     )
 
     metrics_payload = {
@@ -308,6 +359,9 @@ def main() -> None:
         "best_val_metrics": results["best_val_metrics"],
         "test_metrics": {key: value for key, value in results["test_metrics"].items() if key != "predictions"},
         "checkpoint_path": str(results["checkpoint_path"]),
+        "class_weights": results["class_weights"],
+        "class_weighting": class_weight_mode,
+        "sampler_strategy": sampler_strategy,
         "split_source": split_source,
         "split_file": str(split_file) if split_file is not None else None,
     }

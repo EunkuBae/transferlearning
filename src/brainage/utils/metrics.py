@@ -46,7 +46,7 @@ def classification_metrics(
     targets: list[int],
     predictions: list[int],
     num_classes: int,
-) -> dict[str, float | list[list[int]]]:
+) -> dict[str, float | list[list[int]] | dict[str, float]]:
     if len(targets) != len(predictions):
         raise ValueError("targets and predictions must have the same length.")
     if not targets:
@@ -69,6 +69,9 @@ def classification_metrics(
     recalls: list[float] = []
     precisions: list[float] = []
     f1_scores: list[float] = []
+    per_class_precision: dict[str, float] = {}
+    per_class_recall: dict[str, float] = {}
+    per_class_f1: dict[str, float] = {}
     for class_index in range(num_classes):
         true_positive = confusion[class_index][class_index]
         false_negative = sum(confusion[class_index]) - true_positive
@@ -84,6 +87,10 @@ def classification_metrics(
         recalls.append(recall)
         precisions.append(precision)
         f1_scores.append(f1)
+        key = str(class_index)
+        per_class_precision[key] = float(precision)
+        per_class_recall[key] = float(recall)
+        per_class_f1[key] = float(f1)
 
     balanced_accuracy = sum(recalls) / num_classes
     macro_precision = sum(precisions) / num_classes
@@ -97,4 +104,7 @@ def classification_metrics(
         "macro_recall": float(macro_recall),
         "macro_f1": float(macro_f1),
         "confusion_matrix": confusion,
+        "per_class_precision": per_class_precision,
+        "per_class_recall": per_class_recall,
+        "per_class_f1": per_class_f1,
     }

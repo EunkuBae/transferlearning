@@ -1,4 +1,4 @@
-experiment_name: adni_cls_baseline_linux
+experiment_name: adni_cls_multimodal_baseline_linux
 
 data:
   metadata_file: ADNI_MPR_N3_metadata.csv
@@ -25,7 +25,7 @@ model:
   channels: [16, 32, 64, 128]
   head_hidden_dim: 128
   head_dropout: 0.2
-  use_demographics: false
+  use_demographics: true
   tabular_hidden_dim: 16
 
 training:
@@ -44,11 +44,11 @@ training:
   scheduler_patience: 3
   scheduler_min_lr: 0.000001
   selection_metric: balanced_accuracy
-  class_weighting: none
-  sampler: none
+  class_weighting: balanced
+  sampler: balanced
 
 outputs:
-  run_dir: outputs/adni_cls_baseline
+  run_dir: outputs/adni_cls_multimodal_baseline
   run_dir_env:
-  cache_dir: outputs/cache/adni_cls_baseline
+  cache_dir: outputs/cache/adni_cls_multimodal_baseline
   cache_dir_env:

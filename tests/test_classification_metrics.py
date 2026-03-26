@@ -11,3 +11,6 @@ def test_classification_metrics_basic_case():
     assert round(float(metrics["accuracy"]), 4) == 0.6667
     assert round(float(metrics["balanced_accuracy"]), 4) == 0.6667
     assert len(metrics["confusion_matrix"]) == 3
+    assert round(float(metrics["per_class_recall"]["0"]), 4) == 0.5
+    assert round(float(metrics["per_class_precision"]["1"]), 4) == 0.6667
+    assert round(float(metrics["per_class_f1"]["2"]), 4) == 0.6667

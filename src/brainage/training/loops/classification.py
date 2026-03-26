@@ -27,6 +27,7 @@ def train_adni_classifier(
     test_loader,
     config: dict,
     output_dir: Path,
+    class_weights=None,
 ):
     require_torch()
     training_config = config.get("training", {})
@@ -35,7 +36,9 @@ def train_adni_classifier(
     mixed_precision = _resolve_mixed_precision(training_config.get("mixed_precision", "auto"), device)
     model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss()
+    if class_weights is not None:
+        class_weights = class_weights.to(device)
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr=float(training_config.get("learning_rate", 1e-4)),
@@ -100,6 +103,7 @@ def train_adni_classifier(
             "best_val_metrics": best_val_metrics,
             "test_metrics": test_metrics,
             "selection_metric": selection_metric,
+            "class_weights": class_weights.detach().cpu().tolist() if class_weights is not None else None,
         },
         checkpoint_path,
     )
@@ -111,6 +115,7 @@ def train_adni_classifier(
         "checkpoint_path": checkpoint_path,
         "device": str(device),
         "selection_metric": selection_metric,
+        "class_weights": class_weights.detach().cpu().tolist() if class_weights is not None else None,
     }
 
 
