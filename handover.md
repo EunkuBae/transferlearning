@@ -264,6 +264,11 @@ Current results:
   - [`outputs/adni_cls_transfer_multisource_erm_multitask_staged_last1_to_all/metrics.json`](e:/EwhaMediTech/research/brainage/modeling/outputs/adni_cls_transfer_multisource_erm_multitask_staged_last1_to_all/metrics.json)
   - same collapse pattern
 
+- tuned multi-task transfer:
+  - [`outputs/adni_cls_transfer_multisource_erm_multitask_staged_last1_to_all_tuned/metrics.json`](e:/EwhaMediTech/research/brainage/modeling/outputs/adni_cls_transfer_multisource_erm_multitask_staged_last1_to_all_tuned/metrics.json)
+  - `mmse_aux_loss_weight` reduced from `0.2` to `0.01`
+  - same collapse pattern
+
 Multi-seed result summary:
 
 - baseline summary:
@@ -282,7 +287,8 @@ Interpretation:
 - the core failure mode is repeated class collapse
 - changing checkpoint source alone does not fix this
 - MMSE auxiliary features alone do not fix this
-- current multi-task loss is likely poorly scaled and dominates the classification objective
+- reducing the multi-task MMSE loss weight also did not change the outcome
+- this now looks less like a simple loss-scale bug and more like a transfer-formulation mismatch
 
 ### Stage 3. LODO and external generalization
 
@@ -378,15 +384,20 @@ This can be written as a scientifically useful limitation rather than a failed s
 Recommended next priorities:
 
 1. stabilize Stage 2B multi-task loss
-   - reduce `mmse_aux_loss_weight`
-   - normalize ADNI MMSE targets before regression loss
+   - this was attempted and did not change the collapse outcome
+   - further tuning of the same path is now lower priority
 
-2. improve DG only after a stronger ADNI transfer bridge is available
+2. shift Stage 2B effort toward a stronger ADNI classification formulation
+   - stronger classifier head
+   - alternative loss such as focal loss
+   - possibly simpler pairwise tasks such as `MCI vs AD`
+
+3. improve DG only after a stronger ADNI transfer bridge is available
    - current GroupDRO is not yet publishable as a positive result
 
-3. add reporting scripts for direct table and figure export
+4. add reporting scripts for direct table and figure export
 
-4. add lightweight explainability only after the main result tables are fixed
+5. add lightweight explainability only after the main result tables are fixed
 
 ## 9. Operational Notes
 
@@ -401,5 +412,5 @@ If a new collaborator joins now, the safest summary is:
 
 - Stage 1 single-source and multi-source MMSE pretraining are implemented
 - Stage 2A OASIS MMSE transfer is working and improved by multi-source ERM
-- Stage 2B ADNI diagnosis transfer is implemented in many variants but still collapses
+- Stage 2B ADNI diagnosis transfer is implemented in many variants and still collapses, including tuned multi-task
 - the paper is currently strongest as a cognition-transfer success story plus a disease-transfer limitation story
