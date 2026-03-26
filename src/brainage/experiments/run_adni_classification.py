@@ -18,6 +18,7 @@ from brainage.data.adni_cls import (
 from brainage.models.factory import build_adni_classification_model
 from brainage.paths import resolve_path
 from brainage.training.loops.classification import train_adni_classifier
+from brainage.utils.experiment_tracking import record_experiment_run
 from brainage.utils.seed import set_global_seed
 
 try:
@@ -399,8 +400,24 @@ def main() -> None:
         },
     )
 
+    record_experiment_run(
+        experiment_name=str(metrics_payload["experiment_name"]),
+        output_dir=output_dir,
+        config_path=config_path,
+        metrics_payload=metrics_payload,
+        resolved_paths=resolved_paths,
+        artifact_paths={
+            "metrics_json": metrics_json_path,
+            "history_json": history_json_path,
+            "resolved_paths_json": output_dir / "resolved_paths.json",
+            "test_predictions_csv": predictions_csv_path,
+            "summary_txt": summary_txt_path,
+        },
+    )
+
     print(json.dumps({**metrics_payload, "summary_txt": str(summary_txt_path)}, indent=2))
 
 
 if __name__ == "__main__":
     main()
+

@@ -68,7 +68,7 @@ RUN_HISTORY_ROOT="$OUTPUT_DIR/run_history"
 RUN_RECORD_DIR="$RUN_HISTORY_ROOT/$TIMESTAMP"
 RUN_LOG="$RUN_RECORD_DIR/run.log"
 RUN_REGISTRY="$OUTPUT_DIR/run_registry.jsonl"
-
+STARTED_AT="${TIMESTAMP:0:4}-${TIMESTAMP:4:2}-${TIMESTAMP:6:2}T${TIMESTAMP:9:2}:${TIMESTAMP:11:2}:${TIMESTAMP:13:2}"
 mkdir -p "$OUTPUT_DIR" "$CACHE_DIR" "$RUN_RECORD_DIR"
 cp "$CONFIG_FILE_ABS" "$RUN_RECORD_DIR/config_snapshot.yaml"
 printf '%s\n' "$CONFIG_FILE_ABS" > "$RUN_RECORD_DIR/config_path.txt"
@@ -82,12 +82,13 @@ fi
 printf '%s\n' "conda run -n $CONDA_ENV_NAME python -m brainage.experiments.run_hcp_mmse --config $CONFIG_FILE_ABS" > "$RUN_RECORD_DIR/command.txt"
 
 RUN_STATUS=success
+export BRAINAGE_RUN_RECORD_DIR="$RUN_RECORD_DIR"
+export BRAINAGE_RUN_STARTED_AT="$STARTED_AT"
 cd "$PROJECT_ROOT"
-if ! conda run -n "$CONDA_ENV_NAME" python -m brainage.experiments.run_hcp_mmse --config "$CONFIG_FILE_ABS" 2>&1 | tee "$RUN_LOG"; then
+if ! env BRAINAGE_RUN_STATUS=success conda run -n "$CONDA_ENV_NAME" python -m brainage.experiments.run_hcp_mmse --config "$CONFIG_FILE_ABS" 2>&1 | tee "$RUN_LOG"; then
   RUN_STATUS=failed
 fi
 
-STARTED_AT="${TIMESTAMP:0:4}-${TIMESTAMP:4:2}-${TIMESTAMP:6:2}T${TIMESTAMP:9:2}:${TIMESTAMP:11:2}:${TIMESTAMP:13:2}"
 ENDED_AT="$(date +%Y-%m-%dT%H:%M:%S)"
 RUN_REGISTRY="$RUN_REGISTRY" RUN_RECORD_DIR="$RUN_RECORD_DIR" RUN_STATUS="$RUN_STATUS" \
 EXPERIMENT_NAME="$EXPERIMENT_NAME" CONFIG_FILE_ABS="$CONFIG_FILE_ABS" OUTPUT_DIR="$OUTPUT_DIR" CACHE_DIR="$CACHE_DIR" \
@@ -127,3 +128,5 @@ fi
 echo "HCP baseline run completed successfully."
 echo "Output dir: $OUTPUT_DIR"
 echo "Run record: $RUN_RECORD_DIR"
+
+
