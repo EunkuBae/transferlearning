@@ -1,38 +1,30 @@
 # BrainAge Modeling
 
-This repository is developed on Windows and executed on Linux GPU machines. The code should run in both places by switching config files and environment variables instead of editing source code.
+This repository is developed on Windows and executed on Linux GPU machines. The active study direction is now:
 
-## Current Study Direction
+- pretrain the MMSE backbone on HCP only
+- evaluate same-task external transfer on OASIS
+- evaluate cross-task transfer on ADNI
+- measure cross-cohort robustness with LODO-style MMSE evaluation
 
-The current paper direction is:
+## Current Status
 
-- learn a healthy-aging, MMSE-informed 3D MRI backbone
-- test same-task transfer to external MMSE prediction
-- test cross-task transfer to ADNI diagnosis classification
-- quantify cross-cohort robustness
-
-The most up-to-date project handover is:
-
-- [`handover.md`](./handover.md)
-
-## Current Status Snapshot
-
-What is already working:
+Working experiment families:
 
 - HCP MMSE baseline pretraining
 - HCP multimodal MMSE baseline
-- OASIS MMSE transfer
+- OASIS MMSE transfer from HCP checkpoints
 - ADNI scratch diagnosis classification
-- ADNI transfer variants
+- ADNI transfer from HCP checkpoints
 - LODO MMSE evaluation
-- multi-source healthy MMSE pretraining
 - timestamped experiment tracking and lightweight Git-friendly result saving
 
 Current high-level conclusions:
 
-- multi-source healthy MMSE pretraining improves OASIS same-task transfer
-- ADNI disease-classification transfer still collapses in current settings
-- LODO still shows a large external generalization gap
+- HCP-only MMSE pretraining provides a valid cognition-informed backbone
+- OASIS same-task transfer works, but it should now be interpreted only from HCP-pretrained checkpoints
+- ADNI disease classification transfer still tends to collapse in current settings
+- LODO still shows a substantial external generalization gap
 
 Useful result registries:
 
@@ -42,8 +34,6 @@ Useful result registries:
 ## Output Policy
 
 The canonical experiment directory is [`outputs/`](./outputs).
-
-From now on:
 
 - local Windows runs save results under `outputs/`
 - Linux runs also save results under `~/modeling/outputs/`
@@ -116,16 +106,9 @@ The ready-to-use Ubuntu env file is:
 
 - `configs/environment/ubuntu_data_layout.env`
 
-Load it with:
+## Merged Metadata And LODO
 
-```bash
-cd /home/$USER/modeling
-source configs/environment/ubuntu_data_layout.env
-```
-
-## Merged Metadata
-
-The current LODO/DG preparation step uses HCP and ADNI only. OASIS remains in the regression transfer workflow and is intentionally excluded from the merged metadata used for LODO baseline construction in this phase.
+The current LODO preparation step uses HCP and ADNI only. OASIS remains reserved for external same-task transfer and is intentionally excluded from the merged metadata used for LODO baseline construction.
 
 Build the merged metadata CSV on Linux:
 
@@ -138,9 +121,7 @@ PYTHONPATH=src python scripts/build_merged_metadata.py \
   --force
 ```
 
-This writes `data/metadata/merged_metadata.csv`, which can then be used to build frozen LODO split files.
-
-Build an ADNI-holdout LODO split right after that:
+Build an ADNI-holdout LODO split:
 
 ```bash
 cd ~/modeling
@@ -150,7 +131,7 @@ PYTHONPATH=src python scripts/build_splits.py \
   --output data/splits/lodo_adni_holdout.csv
 ```
 
-Run the LODO MMSE regression baseline on Linux:
+Run the LODO MMSE regression baseline:
 
 ```bash
 cd ~/modeling
@@ -159,23 +140,6 @@ bash scripts/run_lodo_from_env.sh \
   configs/environment/ubuntu_data_layout.env \
   configs/experiment/lodo_mmse_adni_holdout.yaml
 ```
-
-## Update On Linux
-
-Pull the latest GitHub contents:
-
-```bash
-cd ~/modeling
-git pull origin main
-```
-
-If you use conda:
-
-```bash
-conda env update -n brainage-hcp-gpu -f configs/environment/linux_gpu_hcp_mmse.yml --prune
-```
-
-After pulling transfer-learning updates, run the env update once before OASIS experiments so dependencies such as `openpyxl` are installed.
 
 ## HCP Baseline
 
@@ -211,30 +175,23 @@ bash scripts/run_hcp_mmse_from_env.sh \
   configs/experiment/hcp_mmse_multimodal_baseline_linux.yaml
 ```
 
-Both HCP baseline configs share the same `data/splits/hcp_mmse_seed42.csv` file. The first run creates it, and later runs reuse it so `MRI-only` and `multimodal` stay directly comparable. Each run also records execution history under `outputs/.../run_history/<timestamp>/` and appends a lightweight index entry to `outputs/.../run_registry.jsonl`.
+Current reference results:
 
-## OASIS Transfer
+- HCP MRI-only baseline test MAE: about `0.921`
+- HCP multimodal baseline test MAE: about `0.869`
 
-The current transfer-learning stage supports HCP to OASIS MMSE fine-tuning.
+## OASIS External Transfer
 
-Example config:
+The OASIS stage is now treated as a strict external same-task transfer benchmark from HCP-only checkpoints.
 
-- `configs/experiment/oasis_mmse_transfer.yaml`
-
-Smoke config:
-
-- `configs/experiment/oasis_mmse_multimodal_transfer_smoke.yaml`
-
-Recommended transfer-learning order:
+Recommended transfer order:
 
 - `configs/experiment/oasis_mmse_transfer_full_ft.yaml`
 - `configs/experiment/oasis_mmse_transfer_freeze_backbone.yaml`
 - `configs/experiment/oasis_mmse_multimodal_transfer_full_ft.yaml`
 - `configs/experiment/oasis_mmse_multimodal_transfer_freeze_backbone.yaml`
 
-The MRI-only transfer configs currently use `load_mode: backbone` so they can initialize safely even when the available HCP checkpoint was trained with demographics. The multimodal transfer configs keep `load_mode: full`.
-
-Run an OASIS transfer experiment on Ubuntu:
+Run the HCP-to-OASIS MRI-only transfer:
 
 ```bash
 cd ~/modeling
@@ -244,56 +201,14 @@ bash scripts/run_oasis_transfer_from_env.sh \
   configs/experiment/oasis_mmse_transfer_full_ft.yaml
 ```
 
-Run the four transfer experiments in order:
+Current reference result:
 
-```bash
-bash scripts/run_oasis_transfer_from_env.sh \
-  configs/environment/ubuntu_data_layout.env \
-  configs/experiment/oasis_mmse_transfer_full_ft.yaml
+- HCP-pretrained full fine-tuning on OASIS test MAE: about `1.896`
+- HCP-pretrained full fine-tuning on OASIS Pearson: about `0.417`
 
-bash scripts/run_oasis_transfer_from_env.sh \
-  configs/environment/ubuntu_data_layout.env \
-  configs/experiment/oasis_mmse_transfer_freeze_backbone.yaml
+Interpretation rule:
 
-bash scripts/run_oasis_transfer_from_env.sh \
-  configs/environment/ubuntu_data_layout.env \
-  configs/experiment/oasis_mmse_multimodal_transfer_full_ft.yaml
-
-bash scripts/run_oasis_transfer_from_env.sh \
-  configs/environment/ubuntu_data_layout.env \
-  configs/experiment/oasis_mmse_multimodal_transfer_freeze_backbone.yaml
-```
-
-Each transfer config writes to its own `outputs/...` directory and also records per-run execution history under `outputs/.../run_history/<timestamp>/`. The runner appends a lightweight run index to `outputs/.../run_registry.jsonl`, while the main artifacts remain `metrics.json`, `history.json`, `training_summary.txt`, and `test_predictions.csv`.
-
-## Multi-Source MMSE Pretraining
-
-The current Stage 1 extension supports healthy multi-source MMSE pretraining using:
-
-- HCP
-- OASIS healthy-only examples
-
-Configs:
-
-- `configs/experiment/mmse_pretraining_erm.yaml`
-- `configs/experiment/mmse_pretraining_groupdro.yaml`
-
-Linux example:
-
-```bash
-cd ~/modeling
-source configs/environment/ubuntu_data_layout.env
-
-bash scripts/run_mmse_pretraining_from_env.sh \
-  configs/environment/ubuntu_data_layout.env \
-  configs/experiment/mmse_pretraining_erm.yaml
-```
-
-Current interpretation:
-
-- `ERM` is the strongest Stage 1 result so far
-- the current `GroupDRO` setup is not yet stable enough to treat as a positive result
-
+- keep OASIS reserved for the external transfer stage
 
 ## ADNI Classification Baseline
 
@@ -303,7 +218,7 @@ Linux baseline config:
 
 - `configs/experiment/adni_cls_baseline_linux.yaml`
 
-Run the ADNI baseline on Ubuntu:
+Run the ADNI baseline:
 
 ```bash
 cd ~/modeling
@@ -313,11 +228,15 @@ bash scripts/run_adni_classification_from_env.sh \
   configs/experiment/adni_cls_baseline_linux.yaml
 ```
 
-This baseline uses a frozen split manifest at `data/splits/adni_cls_seed42.csv` once the first run creates it, so later ADNI classification experiments stay directly comparable.
+Current reference result:
+
+- MRI-only scratch baseline accuracy: `0.444`
+- balanced accuracy: `0.319`
+- macro-F1: `0.255`
 
 ## ADNI Transfer
 
-The ADNI transfer stage tests whether an MMSE-pretrained backbone helps diagnosis classification.
+The ADNI transfer stage tests whether an HCP MMSE-pretrained backbone helps diagnosis classification.
 
 Implemented variants include:
 
@@ -331,40 +250,30 @@ Implemented variants include:
 Representative configs:
 
 - `configs/experiment/adni_cls_transfer_staged_last1_to_all.yaml`
-- `configs/experiment/adni_cls_transfer_multisource_erm_staged_last1_to_all.yaml`
-- `configs/experiment/adni_cls_transfer_multisource_erm_mmse_aux_staged_last1_to_all.yaml`
-- `configs/experiment/adni_cls_transfer_multisource_erm_multitask_staged_last1_to_all.yaml`
+- `configs/experiment/adni_cls_transfer_full_ft.yaml`
+- `configs/experiment/adni_cls_transfer_freeze_backbone.yaml`
 
-Linux example:
+Run a representative ADNI transfer experiment:
 
 ```bash
 cd ~/modeling
 source configs/environment/ubuntu_data_layout.env
-
 bash scripts/run_adni_transfer_from_env.sh \
   configs/environment/ubuntu_data_layout.env \
-  configs/experiment/adni_cls_transfer_multisource_erm_multitask_staged_last1_to_all.yaml
+  configs/experiment/adni_cls_transfer_staged_last1_to_all.yaml
 ```
 
 Current interpretation:
 
 - ADNI scratch baseline is still the most interpretable classifier
-- transfer variants currently tend to collapse to a single class
-- Stage 2B is the main unresolved modeling problem
+- HCP-pretrained transfer variants still tend to collapse to a single class
+- Stage 2B remains the main unresolved modeling problem
 
 ## Tailscale And Tmux
 
 Set up the Linux server once:
 
 ```bash
-bash scripts/setup_tailscale_linux.sh
-```
-
-If the server does not have `curl` yet, the script now tries to install `curl` automatically and falls back to `wget` when available. If you want to do it manually first on Ubuntu:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y curl tmux
 bash scripts/setup_tailscale_linux.sh
 ```
 
@@ -381,8 +290,6 @@ Reattach later:
 ```bash
 bash scripts/attach_hcp_mmse_tmux.sh
 ```
-
-Logs are written under `outputs/.../tmux_logs/`.
 
 ## Git Tracking Rule
 
@@ -413,7 +320,8 @@ Do not track in Git:
 - `scripts/migrate_legacy_outputs.py`
 - `scripts/run_adni_classification_from_env.sh`
 - `scripts/run_hcp_mmse_from_env.sh`
-- `scripts/start_hcp_mmse_tmux.sh`
+- `scripts/run_oasis_transfer_from_env.sh`
 - `src/brainage/experiments/run_adni_classification.py`
+- `src/brainage/experiments/run_adni_transfer.py`
 - `src/brainage/experiments/run_hcp_mmse.py`
 - `src/brainage/experiments/run_oasis_transfer.py`
