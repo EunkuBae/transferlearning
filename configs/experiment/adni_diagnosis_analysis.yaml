@@ -1,0 +1,10 @@
+﻿experiment_name: adni_diagnosis_analysis
+
+inputs:
+  predictions_file: outputs/adni_mmse_transfer_full_ft/test_predictions.csv
+  metadata_file: ADNI_MPR_N3_metadata.csv
+  subject_id_column: PTID
+  diagnosis_column: DX_bl
+
+outputs:
+  run_dir: outputs/adni_diagnosis_analysis

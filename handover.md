@@ -1,64 +1,56 @@
 ﻿# Handover
 
-## Current Direction
+## Current Focus
 
-The repository is now organized around a regression-only workflow.
-The active question is whether HCP MMSE pretraining learns a representation that transfers to downstream MMSE prediction in other cohorts, especially OASIS.
-Raw source data were not deleted during cleanup.
+The codebase now follows a single research storyline:
+HCP healthy-aging MMSE pretraining, OASIS external same-task transfer, ADNI external same-task transfer, and diagnosis-aware analysis of failure patterns.
+Raw source data were preserved during cleanup and reorganization.
 
-## Active Pipeline
+## Active Experiments
 
 ### Stage 1. HCP MMSE pretraining
-
 - entrypoint: `src/brainage/experiments/run_hcp_mmse.py`
-- primary configs:
+- configs:
   - `configs/experiment/hcp_mmse_baseline.yaml`
   - `configs/experiment/hcp_mmse_baseline_linux.yaml`
-- main launcher: `scripts/run_hcp_mmse_from_env.sh`
-- canonical output: `outputs/hcp_mmse_baseline/`
 
 ### Stage 2. OASIS MMSE transfer
-
 - entrypoint: `src/brainage/experiments/run_oasis_transfer.py`
-- primary configs:
+- configs:
   - `configs/experiment/oasis_mmse_transfer_full_ft.yaml`
   - `configs/experiment/oasis_mmse_transfer_freeze_backbone.yaml`
-- main launcher: `scripts/run_oasis_transfer_from_env.sh`
-- canonical outputs:
-  - `outputs/oasis_mmse_transfer_full_ft/`
-  - `outputs/oasis_mmse_transfer_freeze_backbone/`
 
-### Stage 3. Optional LODO regression
+### Stage 3. ADNI MMSE transfer
+- entrypoint: `src/brainage/experiments/run_adni_mmse_transfer.py`
+- configs:
+  - `configs/experiment/adni_mmse_transfer_full_ft.yaml`
+  - `configs/experiment/adni_mmse_transfer_freeze_backbone.yaml`
 
+### Stage 4. ADNI diagnosis-aware analysis
+- entrypoint: `src/brainage/experiments/run_adni_diagnosis_analysis.py`
+- config:
+  - `configs/experiment/adni_diagnosis_analysis.yaml`
+
+### Stage 5. Optional LODO regression
 - entrypoint: `src/brainage/experiments/run_lodo.py`
-- primary config: `configs/experiment/lodo_mmse_adni_holdout.yaml`
-- main launcher: `scripts/run_lodo_from_env.sh`
-- canonical output: `outputs/lodo_mmse_adni_holdout/`
+- config:
+  - `configs/experiment/lodo_mmse_adni_holdout.yaml`
 
-## Suggested Near-Term Study Questions
+## Recommended Narrative
 
-1. Compare HCP baseline versus HCP-pretrained OASIS transfer under full fine-tuning.
-2. Measure whether freezing the backbone meaningfully harms OASIS adaptation.
-3. Quantify external regression degradation with LODO holdout evaluation.
-4. Build a paper narrative around same-task transfer and domain shift.
+1. Learn a healthy-aging MMSE-informed representation on HCP.
+2. Test whether it improves external same-task transfer on OASIS.
+3. Test whether that same representation still carries cognitive signal in ADNI.
+4. Use ADNI diagnosis labels to interpret subgroup error patterns instead of launching a separate disease-classification project.
 
-## Minimal Working Commands
+## Main Scripts
 
-```bash
-bash scripts/pull_and_rerun_hcp_oasis.sh
-```
+- `scripts/run_hcp_mmse_from_env.sh`
+- `scripts/run_oasis_transfer_from_env.sh`
+- `scripts/run_adni_mmse_from_env.sh`
+- `scripts/run_adni_diagnosis_analysis_from_env.sh`
+- `scripts/pull_and_rerun_regression_suite.sh`
 
-```bash
-bash scripts/run_lodo_from_env.sh \
-  configs/environment/ubuntu_data_layout.env \
-  configs/experiment/lodo_mmse_adni_holdout.yaml
-```
+## Next Alternative
 
-## Cleanup Boundary
-
-The cleanup targeted only repository code, configs, and generated outputs.
-These locations were deliberately preserved:
-
-- `data/`
-- root-level source metadata files such as `HCP_A_id_sex_age_mmse_moca.csv`, `ADNI_MPR_N3_metadata.csv`, and `OASIS_MMSE.xlsx`
-- unrelated local edits such as `scripts/setup_tailscale_linux.sh`
+If backbone transfer from supervised HCP MMSE pretraining remains weak under external shift, the next planned extension is SSL pretraining followed by the same OASIS and ADNI MMSE evaluation stack.
