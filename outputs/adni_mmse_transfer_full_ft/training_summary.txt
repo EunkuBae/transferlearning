@@ -1,0 +1,41 @@
+Experiment: adni_mmse_transfer_full_ft
+Task: mmse_regression_transfer
+Device: cuda
+Checkpoint: /home/user/modeling/outputs/adni_mmse_transfer_full_ft/best_model.pt
+Source checkpoint: /home/user/modeling/outputs/hcp_mmse_baseline/best_model.pt
+Load mode: backbone
+Freeze backbone: False
+Use demographics: False
+Loss: huber
+Selection metric: mae
+
+Resolved Paths:
+  metadata_path: /data/C3_ADNI/ADNI_MPR_N3_metadata.csv
+  image_dir: /data/C3_ADNI/ADNI_MPR_N3_ALL
+  output_dir: /home/user/modeling/outputs/adni_mmse_transfer_full_ft
+  cache_dir: /home/user/modeling/outputs/cache/adni_mmse_transfer_full_ft
+
+Dataset:
+  num_examples: 186
+  train: 112
+  val: 37
+  test: 37
+
+Best Validation Metrics:
+  mae: 2.0936412811279297
+  mse: 6.4571271896264175
+  rmse: 2.5410877965206984
+  pearson_r: -0.07945697692941646
+  r2: -0.15522832234691197
+
+Test Metrics:
+  mae: 2.71741263930862
+  mse: 11.022978244117612
+  rmse: 3.3200870838153644
+  pearson_r: -0.005797017026025086
+  r2: -0.13393877488706107
+
+Diagnosis-Aware Test Metrics:
+  AD: {'mae': 4.426256370544434, 'mse': 24.47400990287315, 'rmse': 4.9471213753932854, 'pearson_r': 0.19837200947207348, 'r2': -3.8948019805746297, 'mean_signed_error': 4.426256370544434, 'num_subjects': 10}
+  MCI: {'mae': 2.279768163507635, 'mse': 5.9257688606885495, 'rmse': 2.4342902170219043, 'pearson_r': 0.208610468770701, 'r2': -0.1527621095551679, 'mean_signed_error': 0.9927326549183239, 'num_subjects': 11}
+  NC: {'mae': 1.950265884399414, 'mse': 6.12041490850288, 'rmse': 2.4739472323602376, 'pearson_r': -0.5136271752427982, 'r2': -12.16660686198939, 'mean_signed_error': -1.8953964710235596, 'num_subjects': 16}

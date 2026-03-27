@@ -26,6 +26,6 @@
     "r2": -0.12443393963691785
   },
   "checkpoint_path": "/home/user/modeling/outputs/hcp_mmse_baseline/best_model.pt",
-  "split_source": "generated_and_saved_split_file",
+  "split_source": "existing_split_file",
   "split_file": "/home/user/modeling/data/splits/hcp_mmse_seed42.csv"
 }

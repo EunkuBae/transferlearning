@@ -11,7 +11,7 @@ Resolved Paths:
   output_dir: /home/user/modeling/outputs/hcp_mmse_baseline
   cache_dir: /home/user/modeling/outputs/cache/hcp_mmse_baseline
   split_file: /home/user/modeling/data/splits/hcp_mmse_seed42.csv
-  split_source: generated_and_saved_split_file
+  split_source: existing_split_file
 
 Dataset:
   num_examples: 709
