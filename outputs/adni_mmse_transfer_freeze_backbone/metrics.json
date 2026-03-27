@@ -1,0 +1,74 @@
+{
+  "experiment_name": "adni_mmse_transfer_freeze_backbone",
+  "task": "mmse_regression_transfer",
+  "use_demographics": false,
+  "source_checkpoint_path": "/home/user/modeling/outputs/hcp_mmse_baseline/best_model.pt",
+  "load_mode": "backbone",
+  "freeze_backbone": true,
+  "num_examples": 186,
+  "split_sizes": {
+    "train": 112,
+    "val": 37,
+    "test": 37
+  },
+  "device": "cuda",
+  "loss_name": "huber",
+  "selection_metric": "mae",
+  "best_val_mae": 2.089741526423274,
+  "best_val_metrics": {
+    "mae": 2.089741526423274,
+    "mse": 6.402540341035854,
+    "rmse": 2.530324157303932,
+    "pearson_r": -0.0011567234453899436,
+    "r2": -0.14546232708809304
+  },
+  "checkpoint_load_report": {
+    "loaded_keys": 24,
+    "missing_keys": [
+      "head.layers.0.weight",
+      "head.layers.0.bias",
+      "head.layers.3.weight",
+      "head.layers.3.bias"
+    ],
+    "unexpected_keys": [],
+    "skipped_mismatched_keys": []
+  },
+  "diagnosis_subgroup_metrics": {
+    "AD": {
+      "mae": 3.6912557601928713,
+      "mse": 18.27248528162854,
+      "rmse": 4.274632765703803,
+      "pearson_r": 0.26567668108194614,
+      "r2": -2.654497056325708,
+      "mean_signed_error": 3.6912557601928713,
+      "num_subjects": 10
+    },
+    "MCI": {
+      "mae": 2.2478722659024326,
+      "mse": 5.6499343778020625,
+      "rmse": 2.3769590610277795,
+      "pearson_r": -0.4459506278681224,
+      "r2": -0.09910298989397037,
+      "mean_signed_error": 0.34121478687633167,
+      "num_subjects": 11
+    },
+    "NC": {
+      "mae": 2.7245174646377563,
+      "mse": 8.898317364091099,
+      "rmse": 2.9830047542857017,
+      "pearson_r": -0.35188031045658974,
+      "r2": -18.14259869922119,
+      "mean_signed_error": -2.7245174646377563,
+      "num_subjects": 16
+    }
+  },
+  "test_metrics": {
+    "mae": 2.8440927557043127,
+    "mse": 10.466140778312587,
+    "rmse": 3.2351415391467166,
+    "pearson_r": -0.08500713195134486,
+    "r2": -0.07665665205214367
+  },
+  "checkpoint_path": "/home/user/modeling/outputs/adni_mmse_transfer_freeze_backbone/best_model.pt",
+  "metadata_path": "/data/C3_ADNI/ADNI_MPR_N3_metadata.csv"
+}
