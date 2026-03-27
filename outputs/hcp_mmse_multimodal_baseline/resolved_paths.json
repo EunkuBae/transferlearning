@@ -1,9 +1,0 @@
-{
-  "config_path": "/home/user/modeling/configs/experiment/hcp_mmse_multimodal_baseline_linux.yaml",
-  "runtime_root": "/home/user/modeling",
-  "csv_path": "/home/user/modeling/HCP_A_id_sex_age_mmse_moca.csv",
-  "image_dir": "/data/C1_HCP/hcp_aging",
-  "output_dir": "/home/user/modeling/outputs/hcp_mmse_multimodal_baseline",
-  "cache_dir": "/home/user/modeling/outputs/cache/hcp_mmse_multimodal_baseline",
-  "split_file": "/home/user/modeling/data/splits/hcp_mmse_seed42.csv"
-}

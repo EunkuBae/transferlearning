@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-$HOME/modeling}"
 BRANCH="${BRANCH:-main}"
-COMMIT_MSG="${COMMIT_MSG:-Update experiment results from Linux training run}"
+COMMIT_MSG="${COMMIT_MSG:-Update regression experiment results from Linux training run}"
 REMOTE_NAME="${REMOTE_NAME:-origin}"
 
 cd "$REPO_DIR"
@@ -30,10 +30,8 @@ collect_result_files() {
     \) -print0 \)
 }
 
-# Stage updates to already-tracked result files first.
 git add -u outputs configs/experiment/outputs || true
 
-# Stage canonical lightweight result artifacts from current output trees.
 while IFS= read -r -d '' path; do
   git add -- "$path"
 done < <(collect_result_files "outputs")
@@ -42,17 +40,11 @@ while IFS= read -r -d '' path; do
   git add -- "$path"
 done < <(collect_result_files "configs/experiment/outputs")
 
-# Force-add global experiment registries because outputs/metrics is gitignored.
 if [ -f "outputs/metrics/experiment_runs.csv" ]; then
   git add -f -- "outputs/metrics/experiment_runs.csv"
 fi
 if [ -f "outputs/metrics/experiment_runs.jsonl" ]; then
   git add -f -- "outputs/metrics/experiment_runs.jsonl"
-fi
-
-# Keep optional aggregated summaries if they exist.
-if [ -f "outputs/metrics/adni_classification_seed_summary.json" ]; then
-  git add -f -- "outputs/metrics/adni_classification_seed_summary.json"
 fi
 
 if git diff --cached --quiet; then

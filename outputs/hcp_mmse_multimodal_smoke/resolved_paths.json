@@ -1,8 +1,0 @@
-{
-  "config_path": "E:\\EwhaMediTech\\research\\brainage\\modeling\\configs\\experiment\\hcp_mmse_multimodal_smoke.yaml",
-  "runtime_root": "E:\\EwhaMediTech\\research\\brainage\\modeling",
-  "csv_path": "E:\\EwhaMediTech\\research\\brainage\\modeling\\HCP_A_id_sex_age_mmse_moca.csv",
-  "image_dir": "D:\\C1_HCP\\hcp_aging",
-  "output_dir": "E:\\EwhaMediTech\\research\\brainage\\modeling\\outputs\\hcp_mmse_multimodal_smoke",
-  "cache_dir": "E:\\EwhaMediTech\\research\\brainage\\modeling\\outputs\\cache\\hcp_mmse_multimodal_smoke"
-}

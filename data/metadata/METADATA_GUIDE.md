@@ -1,4 +1,4 @@
-# Metadata Guide
+﻿# Metadata Guide
 
 This file defines the expected format for `merged_metadata.csv`.
 
@@ -7,7 +7,7 @@ This file defines the expected format for `merged_metadata.csv`.
 - `subject_id`: unique subject identifier across the merged table
 - `cohort`: one of `hcp`, `oasis`, `adni`
 - `image_path`: path to the processed MRI volume
-- `diagnosis`: unified diagnosis label used by the model
+- `diagnosis`: harmonized cohort label kept for metadata consistency
 
 These four columns are required by the current split builder.
 
@@ -23,14 +23,12 @@ These four columns are required by the current split builder.
 
 ## Diagnosis Convention
 
-Use unified labels after harmonization.
+Use a harmonized label set before finalizing the merged table.
 
 - `NC`
 - `QC`
 - `MCI`
 - `AD`
-
-The raw cohort-specific labels should be harmonized before this merged metadata file is finalized.
 
 ## Image Path Convention
 
@@ -59,7 +57,7 @@ Empty `mmse` is allowed, but the script prints a warning unless `--allow-missing
 ## Recommended Build Order
 
 1. create cohort-specific metadata tables
-2. harmonize diagnosis labels using `label_mapping.csv`
+2. harmonize cohort labels into the shared diagnosis convention
 3. create `merged_metadata.csv` from `merged_metadata_template.csv`
 4. validate and build splits with `scripts/build_splits.py`
 5. freeze the generated split CSV files in `data/splits/`
@@ -75,5 +73,5 @@ python scripts/create_metadata_sample.py
 Build a split file:
 
 ```bash
-PYTHONPATH=src python scripts/build_splits.py   --metadata data/metadata/merged_metadata.csv   --holdout-cohort adni
+PYTHONPATH=src python scripts/build_splits.py --metadata data/metadata/merged_metadata.csv --holdout-cohort adni
 ```
